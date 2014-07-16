@@ -5,7 +5,7 @@
 //######################################################################
 // StringReader
 function StringReader(string) {
-  this['class'] = this.constructor.name;
+  // this['class'] = this.constructor.name;
   this.contents = string;
   this.contentsLength = this.contents.length;
   this.contentsIndex = 0;

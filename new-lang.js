@@ -33,6 +33,5 @@ fs.readFile(fileName, function (err, contents) {
   //var parser = new Parser(lexer);
   var a;
   while (a = lexer.read())
-    console.log(util.inspect(a, {colors: true}));
+    console.log(util.inspect(a, {colors: true}).replace(/\n /g, ''));
 });
-

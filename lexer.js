@@ -17,6 +17,7 @@ var RE_NUM_PART = /(0x[0-9a-f]*|0o[0-7]*|0b[01]*|(\d+(\.\d*)?|(\.\d*))(e[+\-]?\d
 var RE_SEP = /[\(\){}\[\];]/;
 var RE_OPE = /[+\-*/<=>?:!&|^~,.]+/;	// <K<V>> に注意! できるのか?
 
+//######################################################################
 function match(string, regexp) {
   var matched = string.match(regexp);
   if (!matched) return false;
@@ -26,7 +27,7 @@ function match(string, regexp) {
 //######################################################################
 // lexer: reader -> token
 function Lexer(reader) {
-  this['class'] = this.constructor.name;
+  // this['class'] = this.constructor.name;
   this.reader = reader;
   this.unreadStack = [];
 }

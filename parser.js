@@ -2,7 +2,7 @@
 
 //######################################################################
 function Parser(lexer) {
-  this['class'] = this.constructor.name;
+  // this['class'] = this.constructor.name;
   this.lexer = lexer;
 }
 

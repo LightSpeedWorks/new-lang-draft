@@ -7,7 +7,7 @@ function Token(type, string) {
   if (!(this instanceof Token))
     return new Token(type, string);
 
-  this['class'] = this.constructor.name;
+  // this['class'] = this.constructor.name;
   this.type = type;
   this.string = string;
 

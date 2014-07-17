@@ -85,9 +85,10 @@ Parser.prototype.parseBlock = function parseBlock() {
   while (stmt = this.parseStatement())
     stmts.push(stmt);
 
-  if (stmts.length === 0) return null;
-  if (stmts.length === 1) return stmts[0];
-  return stmts;
+  return new Tree.BlockTree(stmts);
+  //if (stmts.length === 0) return null;
+  //if (stmts.length === 1) return stmts[0];
+  //return stmts;
 };
 
 //######################################################################
@@ -96,7 +97,8 @@ Parser.prototype.parseStatement = function parseStatement() {
   var expr = this.parseExpr();
 
   // TODO: check EOL also
-  if (this.lexer.peek() == ";") this.lexer.read();
+  if (this.lexer.peek() == ';')
+    this.lexer.read(); // skip op
 
   return expr;
 };
@@ -110,30 +112,33 @@ Parser.prototype.parseExpr = function parseExpr() {
 
   var exprs = [expr];
 
-  while (this.lexer.peek() == ",") {
-    this.lexer.read(); // skip ","
-    exprs.push(expr);
+  while (this.lexer.peek() == ',') {
+    this.lexer.read(); // skip op
     expr = this.parseAssignExpr();
     if (expr === null) break;
+    exprs.push(expr);
   }
 
   if (exprs.length === 1) return exprs[0];
-  return exprs;
+  return new Tree.CommaTree(exprs);
 };
 
 //######################################################################
 // parseAssignExpr: 式
+var assignOps = {
+  '=':1,   '+=':1,  '-=':1,   '*=':1, '/=':1, '%=':1,
+  '<<=':1, '>>=':1, '>>>=':1, '&=':1, '^=':1, '|=':1
+};
 Parser.prototype.parseAssignExpr = function parseAssignExpr() {
   var expr = this.parseYieldExpr();
   if (expr === null) return null;
 
-  var token = this.lexer.peek();
-  var str = token.toString();
-  if (str == "=") {
-    this.lexer.read(); // skip "="
+  var s = this.lexer.peek() + '';
+  if (s in assignOps) {
+    var op = this.lexer.read(); // skip op
     var expr2 = this.parseAssignExpr();
-    // TODO: Tree
-    return [expr, token, expr2];
+    if (expr2 === null) return null; // TODO: error
+    return Tree.BinTree.create(op, expr, expr2);
   }
   // TODO: other op= ...
   return expr;
@@ -142,11 +147,11 @@ Parser.prototype.parseAssignExpr = function parseAssignExpr() {
 //######################################################################
 // parseYieldExpr: 式
 Parser.prototype.parseYieldExpr = function parseYieldExpr() {
-  if (this.lexer.peek() == "yeild") {
-    this.lexer.read(); // skip "yield"
+  if (this.lexer.peek() == 'yeild') {
+    var op = this.lexer.read(); // skip 'yield'
     var expr = this.parseYieldExpr();
-    // TODO: return new YieldTree(expr);
-    return expr;
+    if (expr === null) return null; // TODO: error
+    return new Tree.PrefixTree(op, expr);
   }
 
   return this.parseCondExpr();

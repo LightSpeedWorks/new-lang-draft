@@ -15,6 +15,12 @@ function Token(type, string) {
 }
 
 //######################################################################
+// toString 文字列に変換する
+Token.prototype.toString = function toString() {
+  return this.string;
+}
+
+//######################################################################
 util.inherits(OpeToken, Token);
 function OpeToken(string) {
   Token.call(this, 'ope', string);

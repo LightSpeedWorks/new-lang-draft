@@ -27,6 +27,9 @@ function match(string, regexp) {
 //######################################################################
 // lexer: reader -> token
 function Lexer(reader) {
+  if (!(this instanceof Lexer))
+    return new Lexer(reader);
+
   // this['class'] = this.constructor.name;
   this.reader = reader;
   this.unreadStack = [];

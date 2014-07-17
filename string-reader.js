@@ -5,6 +5,9 @@
 //######################################################################
 // StringReader
 function StringReader(string) {
+  if (!(this instanceof StringReader))
+    return new StringReader(string);
+
   // this['class'] = this.constructor.name;
   this.contents = string;
   this.contentsLength = this.contents.length;

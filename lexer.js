@@ -41,7 +41,15 @@ Lexer.prototype.next = function next() {
   var token = this.read();
   if (token === null) return {done: true};
   return {done: false, value: token};
-}
+};
+
+//######################################################################
+// peek token.
+Lexer.prototype.peek = function peek() {
+  var token = this.read();
+  if (token !== null) this.unread(token);
+  return token;
+};
 
 //######################################################################
 // read token.
@@ -122,23 +130,23 @@ Lexer.prototype.read = function read() {
     return new EtcToken(ch);
   }
 
-//  if (this.contentsIndex >= this.contentsLength)
-//    return null; // EOF
-
-//  return this.contents[this.contentsIndex++];
 };
 
 //######################################################################
 // unread token or token of array.
 Lexer.prototype.unread = function unread(token) {
+  // token が null の場合、何もしない
   if (token === null) return;
 
+  // 1つの token の場合
   if (token instanceof Token)
     return this.unreadStack.push(token);
 
+  // 配列以外の場合
   if (!(token instanceof Array))
     throw new TypeError('Token type error: ' + typeof token + ' ' + token.constructor.name);
 
+  // 配列の場合 (後ろから積む、前から取り出せる様に)
   for (var i = token.length - 1; i >= 0; --i) {
     if (!(token[i] instanceof Token))
       throw new TypeError('Token type error: ' + typeof token[i] + ' ' + token[i].constructor.name);

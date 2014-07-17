@@ -131,6 +131,8 @@ Lexer.prototype.read = function read() {
 //######################################################################
 // unread token or token of array.
 Lexer.prototype.unread = function unread(token) {
+  if (token === null) return;
+
   if (token instanceof Token)
     return this.unreadStack.push(token);
 

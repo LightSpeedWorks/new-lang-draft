@@ -5,6 +5,7 @@ var OpeToken = Token.OpeToken;
 var SymToken = Token.SymToken;
 var SepToken = Token.SepToken;
 var NumToken = Token.NumToken;
+var StrToken = Token.StrToken;
 var EtcToken = Token.EtcToken;
 
 // パターン
@@ -16,6 +17,10 @@ var RE_NUM_PART = /(0x[0-9a-f]*|0o[0-7]*|0b[01]*|(\d+(\.\d*)?|(\.\d*))(e[+\-]?\d
 
 var RE_SEP = /[\(\){}\[\];]/;
 var RE_OPE = /[+\-*/<=>?:!&|^~,.]+/;	// <K<V>> に注意! できるのか?
+
+var STR_SQUOT = "'";
+var STR_DQUOT = '"';
+var STR_BACKSLASH = '\\';
 
 //######################################################################
 function match(string, regexp) {
@@ -125,6 +130,23 @@ Lexer.prototype.read = function read() {
     }
     this.reader.unread(ch);
     return new OpeToken(prevString);
+  } else if (ch === STR_SQUOT || ch === STR_DQUOT) {
+    var end = ch;
+    ch = this.reader.read();
+    if (ch === null) return null; // EOF
+    string += ch;
+    while (ch !== end) {
+      ch = this.reader.read();
+      if (ch === null) return null; // EOF
+      string += ch;
+      if (ch === STR_BACKSLASH) {
+        ch = this.reader.read();
+        if (ch === null) return null; // EOF
+        string += ch;
+        ch = '';
+      }
+    }
+    return new StrToken(string);
   } else {
     // それ以外は何でしょうか?
     return new EtcToken(ch);

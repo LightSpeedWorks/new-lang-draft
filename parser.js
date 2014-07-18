@@ -1,6 +1,6 @@
 'use strict';
 
-var Tree = require('./tree');
+var Syntax = require('./syntax');
 
 //######################################################################
 // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
@@ -86,7 +86,7 @@ Parser.prototype.parseBlock = function parseBlock() {
   while (stmt = this.parseStatement())
     stmts.push(stmt);
 
-  return new Tree.BlockTree(stmts);
+  return new Syntax.BlockSyntax(stmts);
   //if (stmts.length === 0) return null;
   //if (stmts.length === 1) return stmts[0];
   //return stmts;
@@ -121,7 +121,7 @@ Parser.prototype.parseExpr = function parseExpr() {
   }
 
   if (exprs.length === 1) return exprs[0];
-  return new Tree.CommaTree(exprs);
+  return new Syntax.CommaSyntax(exprs);
 };
 
 //######################################################################
@@ -139,7 +139,7 @@ Parser.prototype.parseAssignExpr = function parseAssignExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseAssignExpr();
     if (expr2 === null) return null; // TODO: error
-    return Tree.BinTree.create(op, expr, expr2);
+    return Syntax.BinSyntax.create(op, expr, expr2);
   }
   // TODO: other op= ...
   return expr;
@@ -152,7 +152,7 @@ Parser.prototype.parseYieldExpr = function parseYieldExpr() {
     var op = this.lexer.read(); // skip 'yield'
     var expr = this.parseYieldExpr();
     if (expr === null) return null; // TODO: error
-    return new Tree.PrefixTree(op, expr);
+    return new Syntax.PrefixSyntax(op, expr);
   }
 
   return this.parseCondExpr();
@@ -174,7 +174,7 @@ Parser.prototype.parseCondExpr = function parseCondExpr() {
       var expr3 = this.parseCondExpr();
       //if (expr3 === null) break; // TODO: error
 
-      return new TriTree(op, expr, expr2, expr3);
+      return new TriSyntax(op, expr, expr2, expr3);
     }
     
     // TODO: error
@@ -193,7 +193,7 @@ Parser.prototype.parseLogOrExpr = function parseLogOrExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseLogAndExpr();
     if (expr2 === null) break; // TODO: error
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
   }
 
   return expr;
@@ -209,7 +209,7 @@ Parser.prototype.parseLogAndExpr = function parseLogAndExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitOrExpr();
     if (expr2 === null) break; // TODO: error
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
   }
 
   return expr;
@@ -225,7 +225,7 @@ Parser.prototype.parseBitOrExpr = function parseBitOrExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitXorExpr();
     if (expr2 === null) break; // TODO: error
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
   }
 
   return expr;
@@ -241,7 +241,7 @@ Parser.prototype.parseBitXorExpr = function parseBitXorExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitAndExpr();
     if (expr2 === null) break; // TODO: error
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
   }
 
   return expr;
@@ -257,7 +257,7 @@ Parser.prototype.parseBitAndExpr = function parseBitAndExpr() {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseEqRelExpr();
     if (expr2 === null) break; // TODO: error
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
   }
 
   return expr;
@@ -276,7 +276,7 @@ Parser.prototype.parseEqRelExpr = function parseEqRelExpr() {
     var expr2 = this.parseCompRelExpr();
     if (expr2 === null) break; // TODO: error
 
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
 
@@ -296,7 +296,7 @@ Parser.prototype.parseCompRelExpr = function parseCompRelExpr() {
     var expr2 = this.parseBitShiftExpr();
     if (expr2 === null) break; // TODO: error
 
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
 
@@ -316,7 +316,7 @@ Parser.prototype.parseBitShiftExpr = function parseBitShiftExpr() {
     var expr2 = this.parseAddSubExpr();
     if (expr2 === null) break; // TODO: error
 
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
 
@@ -336,7 +336,7 @@ Parser.prototype.parseAddSubExpr = function parseAddSubExpr() {
     var expr2 = this.parseMulDivExpr();
     if (expr2 === null) break; // TODO: error
 
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
 
@@ -357,7 +357,7 @@ Parser.prototype.parseMulDivExpr = function parseMulDivExpr() {
     var expr2 = this.parseMonoExpr();
     if (expr2 === null) break; // TODO: error
 
-    expr = new BinTree(op, expr, expr2);
+    expr = new BinSyntax(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
 
@@ -375,7 +375,7 @@ Parser.prototype.parseMonoExpr = function parseMonoExpr() {
     var expr = this.parseMonoExpr();
     if (expr === null) return null; // TODO: error
 
-    return new PrefixTree(op, expr);
+    return new PrefixSyntax(op, expr);
   }
 
   return this.parseIncDecExpr();
@@ -391,7 +391,7 @@ Parser.prototype.parseIncDecExpr = function parseIncDecExpr() {
     var expr = this.parseFuncCallExpr();
     if (expr === null) return null; // TODO: error
 
-    return new PrefixTree(op, expr);
+    return new PrefixSyntax(op, expr);
   }
 
   var expr = this.parseFuncCallExpr();
@@ -399,7 +399,7 @@ Parser.prototype.parseIncDecExpr = function parseIncDecExpr() {
   if (s == "++" || s == "--") {
     var op = this.lexer.read(); // skip op
 
-    return new PostfixTree(op, expr);
+    return new PostfixSyntax(op, expr);
   }
   return expr;
 };

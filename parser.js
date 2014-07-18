@@ -82,22 +82,21 @@ function Parser(lexer) {
 //######################################################################
 // parseBlock: ブロック
 Parser.prototype.parseBlock = function parseBlock() {
-  var stmts = [];
-  var stmt;
+  var stmt = this.parseStatement();
+  if (stmt === null) return null;
+  var stmts = [stmt];
 
   while (stmt = this.parseStatement())
     stmts.push(stmt);
 
   return new Syntax.BlockSyntax(stmts);
-  //if (stmts.length === 0) return null;
-  //if (stmts.length === 1) return stmts[0];
-  //return stmts;
 };
 
 //######################################################################
 // parseStatement: 文
 Parser.prototype.parseStatement = function parseStatement() {
   var expr = this.parseExpr();
+  if (expr === null) return null;
 
   // TODO: check EOL also
   if (this.lexer.peek() == ';')
@@ -112,7 +111,6 @@ Parser.prototype.parseStatement = function parseStatement() {
 Parser.prototype.parseExpr = function parseExpr() {
   var expr = this.parseAssignExpr();
   if (expr === null) return null;
-
   var exprs = [expr];
 
   while (this.lexer.peek() == ',') {
@@ -437,7 +435,7 @@ Parser.prototype.parseFuncCallExpr = function parseFuncCallExpr() {
     var op = this.lexer.read(); // skip op
     var args = [];
     var s = ',';
-    while (s == ',') {
+    while (s === ',') {
       var arg = this.parseAssignExpr();
       if (arg === null) throw new Error('FuncCall 引数の式が無い');
       op = this.lexer.read();
@@ -445,7 +443,7 @@ Parser.prototype.parseFuncCallExpr = function parseFuncCallExpr() {
       s = op + '';
     }
 
-    if (s != ')') throw new Error('FuncCall ")" expected');
+    if (s !== ')') throw new Error('FuncCall ")" expected');
     return new Syntax.FuncCallSyntax(expr, args);
   }
 
@@ -492,11 +490,12 @@ var coreTokens = {
   'NumToken':1, 'SymToken':1, 'StrToken':1
 };
 Parser.prototype.parseCoreExpr = function parseCoreExpr() {
-  var op = this.lexer.peek();
+  var op = this.lexer.read();
+  if (op === null) return null;
   var s = op + '';
 
   if (s === '(') {
-    expr = this.parseExpr();
+    var expr = this.parseExpr();
     if (expr === null) throw new Error('( 式が無い');
     op = this.lexer.read();
     if (op != ')') throw new Error(') expected');
@@ -509,4 +508,5 @@ Parser.prototype.parseCoreExpr = function parseCoreExpr() {
   return null;
 };
 
+//----------------------------------------------------------------------
 exports = module.exports = Parser;

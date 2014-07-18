@@ -75,9 +75,17 @@ function PrefixSyntax(op, syntax) {
 
 //======================================================================
 PrefixSyntax.ctors = {
-  '++': PreIncSyntax,
-  '--': PreDecSyntax,
+  '++':  PreIncSyntax,
+  '--':  PreDecSyntax,
+  '+':   PlusSyntax,
+  '-':   MinusSyntax,
+  '!':   LogNotSyntax,
+  '~':   BitNotSyntax,
   'new': NewSyntax,
+  'typeof': TyepofSyntax,
+  'void':   VoidSyntax,
+  'delete': DeleteSyntax,
+  // sizeof
 }
 //----------------------------------------------------------------------
 PrefixSyntax.create = function create(op, syntax) {
@@ -112,6 +120,42 @@ PreDecSyntax.prototype.run = function run(env) {
   return val;
 }
 //----------------------------------------------------------------------
+inherits(PlusSyntax, PrefixSyntax);
+function PlusSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PlusSyntax.prototype.run = function run(env) {
+  return this.syntax.run(env);
+}
+//----------------------------------------------------------------------
+inherits(MinusSyntax, PrefixSyntax);
+function MinusSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MinusSyntax.prototype.run = function run(env) {
+  return - this.syntax.run(env);
+}
+//----------------------------------------------------------------------
+inherits(LogNotSyntax, PrefixSyntax);
+function LogNotSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LogNotSyntax.prototype.run = function run(env) {
+  return ! this.syntax.run(env);
+}
+//----------------------------------------------------------------------
+inherits(BitNotSyntax, PrefixSyntax);
+function BitNotSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+BitNotSyntax.prototype.run = function run(env) {
+  return ~ this.syntax.run(env);
+}
+//----------------------------------------------------------------------
 inherits(NewSyntax, PrefixSyntax);
 function NewSyntax(op, syntax) {
   PrefixSyntax.call(this, op, syntax);
@@ -120,6 +164,33 @@ function NewSyntax(op, syntax) {
 NewSyntax.prototype.run = function run(env) {
   var func = this.syntax.run(env);
   throw new Error('未実装');
+}
+//----------------------------------------------------------------------
+inherits(TyepofSyntax, PrefixSyntax);
+function TyepofSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TyepofSyntax.prototype.run = function run(env) {
+  return typeof this.syntax.run(env);
+}
+//----------------------------------------------------------------------
+inherits(VoidSyntax, PrefixSyntax);
+function VoidSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+VoidSyntax.prototype.run = function run(env) {
+  return void this.syntax.run(env);
+}
+//----------------------------------------------------------------------
+inherits(DeleteSyntax, PrefixSyntax);
+function DeleteSyntax(op, syntax) {
+  PrefixSyntax.call(this, op, syntax);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+DeleteSyntax.prototype.run = function run(env) {
+  return delete this.syntax.run(env);
 }
 
 //######################################################################
@@ -200,12 +271,21 @@ BinSyntax.ctors = {
   '&&':   LogAndSyntax,
   '|':    BitOrSyntax,
   '^':    BitXorSyntax,
-  '&':    BitOrSyntax,
+  '&':    BitAndSyntax,
   '==':   EqRelSyntax,
   '===':  StrictEqRelSyntax,
   '!=':   NotEqRelSyntax,
   '!==':  StrictNotEqRelSyntax,
+  '<':    LtRelSyntax,
+  '<=':   LeRelSyntax,
+  '>':    GtRelSyntax,
+  '>=':   GeRelSyntax,
+  '<<':   LogShiftLeftSyntax,
+  '>>':   ArithShiftRightSyntax,
+  '>>>':  LogShiftRightSyntax,
   '?:':   Cond2Syntax,
+  'in':          InSyntax,
+  'instanceof':  InstanceofSyntax,
 };
 //----------------------------------------------------------------------
 BinSyntax.create = function create(op, syntax1, syntax2) {
@@ -461,6 +541,69 @@ StrictNotEqRelSyntax.prototype.run = function run(env) {
   return this.syntax1.run(env) !== this.syntax2.run(env);
 }
 //----------------------------------------------------------------------
+inherits(LtRelSyntax, BinSyntax);
+function LtRelSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LtRelSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) < this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(LeRelSyntax, BinSyntax);
+function LeRelSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LeRelSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) <= this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(GtRelSyntax, BinSyntax);
+function GtRelSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+GtRelSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) > this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(GeRelSyntax, BinSyntax);
+function GeRelSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+GeRelSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) >= this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(LogShiftLeftSyntax, BinSyntax);
+function LogShiftLeftSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LogShiftLeftSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) << this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(ArithShiftRightSyntax, BinSyntax);
+function ArithShiftRightSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ArithShiftRightSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) >> this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(LogShiftRightSyntax, BinSyntax);
+function LogShiftRightSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LogShiftRightSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) >>> this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
 inherits(Cond2Syntax, BinSyntax);
 function Cond2Syntax(op, syntax1, syntax2) {
   BinSyntax.call(this, op, syntax1, syntax2);
@@ -470,6 +613,24 @@ Cond2Syntax.prototype.run = function run(env) {
   var val = this.syntax1.run(env);
   // TODO: 正しいのかチェックしてください。
   return val ? val : this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(InSyntax, BinSyntax);
+function InSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+InSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) in this.syntax2.run(env);
+}
+//----------------------------------------------------------------------
+inherits(InstanceofSyntax, BinSyntax);
+function InstanceofSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+InstanceofSyntax.prototype.run = function run(env) {
+  return this.syntax1.run(env) instanceof this.syntax2.run(env);
 }
 /*
 //----------------------------------------------------------------------
@@ -580,7 +741,7 @@ AccessThinArrowSyntax.prototype.locate = function locate(env) {
 //######################################################################
 inherits(CoreSyntax, Syntax);
 function CoreSyntax(token) {
-  Syntax.call();
+  Syntax.call(this);
   this.token = token;
 }
 
@@ -621,8 +782,18 @@ function SymbolSyntax(token) {
   CoreSyntax.call(this, token);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+SymbolSyntax.reservedGlobalConstants = {
+  'null': null,
+  'undefined': undefined,
+  'true': true,
+  'false': false,
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SymbolSyntax.prototype.run = function run(env) {
-  return this.token.value;
+  var s = this.token.string;
+  if (s in SymbolSyntax.reservedGlobalConstants)
+    return SymbolSyntax.reservedGlobalConstants[s];
+  throw new Error('未実装');
 }
 
 //----------------------------------------------------------------------

@@ -14,6 +14,7 @@ var syntaxes = [];
 //######################################################################
 syntaxes.push(Syntax);
 function Syntax() {
+  this['class'] = this.constructor.name;
 }
 
 //######################################################################
@@ -133,11 +134,11 @@ BinSyntax.ctors = {
   '|':    BitOrSyntax,
   '^':    BitXorSyntax,
   '&':    BitOrSyntax,
-  '?:':   Cond2Syntax,
   '==':   EqRelSyntax,
   '===':  StrictEqRelSyntax,
   '!=':   NotEqRelSyntax,
   '!==':  StrictNotEqRelSyntax,
+  '?:':   Cond2Syntax,
 };
 //----------------------------------------------------------------------
 BinSyntax.create = function create(op, syntax1, syntax2) {
@@ -258,11 +259,6 @@ function BitOrSyntax(op, syntax1, syntax2) {
   BinSyntax.call(this, op, syntax1, syntax2);
 }
 //----------------------------------------------------------------------
-inherits(Cond2Syntax, BinSyntax);
-function Cond2Syntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
-}
-//----------------------------------------------------------------------
 inherits(EqRelSyntax, BinSyntax);
 function EqRelSyntax(op, syntax1, syntax2) {
   BinSyntax.call(this, op, syntax1, syntax2);
@@ -280,6 +276,11 @@ function NotEqRelSyntax(op, syntax1, syntax2) {
 //----------------------------------------------------------------------
 inherits(StrictNotEqRelSyntax, BinSyntax);
 function StrictNotEqRelSyntax(op, syntax1, syntax2) {
+  BinSyntax.call(this, op, syntax1, syntax2);
+}
+//----------------------------------------------------------------------
+inherits(Cond2Syntax, BinSyntax);
+function Cond2Syntax(op, syntax1, syntax2) {
   BinSyntax.call(this, op, syntax1, syntax2);
 }
 /*

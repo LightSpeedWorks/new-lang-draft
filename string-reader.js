@@ -4,7 +4,7 @@
 
 //######################################################################
 // StringReader
-function StringReader(string) {
+function StringReader(string, file) {
   if (!(this instanceof StringReader))
     return new StringReader(string);
 
@@ -15,6 +15,7 @@ function StringReader(string) {
   this.unreadStack = [];
   this.line = 1;
   this.column = 1;
+  this.file = file;
 }
 
 //######################################################################

@@ -28,12 +28,10 @@ fs.readFile(fileName, function (err, contents) {
     process.exit(1); // error abnormal exit
   }
 
-  var reader = new StringReader(contents.toString());
+  var reader = new StringReader(contents.toString(), fileName);
   var lexer = new Lexer(reader);
   //var parser = new Parser(lexer);
   var token;
-  while (token = lexer.read()) {
-    console.log([reader.line, reader.column - 1] + '\t' +
-      util.inspect(token, {colors: true}).replace(/\n /g, ''));
-  }
+  while (token = lexer.read())
+    console.log(util.inspect(token, {colors: true}).replace(/\n /g, ''));
 });

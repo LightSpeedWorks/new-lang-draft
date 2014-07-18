@@ -70,6 +70,29 @@ Lexer.prototype.read = function read() {
     ch = this.reader.read();
     if (ch === null) return null; // EOF
   }
+  var pos = [this.reader.line, this.reader.column - 1, this.reader.file];
+  this.reader.unread(ch);
+
+  var token = this._read();
+  if (token === null) return token;
+  token.pos = pos;
+  return token;
+}
+
+//######################################################################
+// read token.
+Lexer.prototype._read = function _read() {
+  if (this.unreadStack.length > 0)
+    return this.unreadStack.pop();
+
+  var ch = this.reader.read();
+  if (ch === null) return null; // EOF
+
+  // ホワイトスペース
+  while (ch.match(RE_WHITE_SPACE)) {
+    ch = this.reader.read();
+    if (ch === null) return null; // EOF
+  }
   var string = ch;
   var prevString = '';
   var ahead = '';

@@ -4,30 +4,40 @@ var util = require('util');
 
 var trees = [];
 
+// 実行して値を返す run eval exec calc
+// 実行直前の場所を返す locate
+//   symbol -> SymToken
+//   expr.symbol -> AccessDot
+//   expr[expr]  -> AccessGetSet
+// コンパイル・計算できる所(数値や定数が引数の純粋関数の場合)は実行する compile
+
 //######################################################################
 trees.push(Tree);
 function Tree() {
 }
 
 //######################################################################
-util.inherits(BlockTree, Tree);
-trees.push(BlockTree);
+function inherits(ctor, superCtor) {
+  util.inherits(ctor, superCtor);
+  trees.push(ctor);
+}
+
+//######################################################################
+inherits(BlockTree, Tree);
 function BlockTree(trees) {
   Tree.call(this);
   this.trees = trees;
 }
 
 //######################################################################
-util.inherits(CommaTree, Tree);
-trees.push(CommaTree);
+inherits(CommaTree, Tree);
 function CommaTree(trees) {
   Tree.call(this);
   this.trees = trees;
 }
 
 //######################################################################
-util.inherits(PrefixTree, Tree);
-trees.push(PrefixTree);
+inherits(PrefixTree, Tree);
 function PrefixTree(op, tree) {
   Tree.call(this);
   this.op = op;
@@ -35,31 +45,31 @@ function PrefixTree(op, tree) {
 }
 
 //======================================================================
-PrefixTree.create = function create(op, expr) {
+PrefixTree.ctors = {
+  '++': PreIncTree,
+  '--': PreDecTree,
+}
+//----------------------------------------------------------------------
+PrefixTree.create = function create(op, tree) {
   var s = op + '';
-  switch (s) {
-    case '++': return new PreIncTree(op, tree);
-    case '--': return new PreDecTree(op, tree);
-    default: throw TypeError('Op: ' + op);
-  }
+  var ctor = PrefixTree.ctors[s];
+  if (ctor) return new ctor(op, tree);
+  throw TypeError('Op: ' + op);
 };
 
 //----------------------------------------------------------------------
-util.inherits(PreIncTree, PrefixTree);
-trees.push(PreIncTree);
+inherits(PreIncTree, PrefixTree);
 function PreIncTree(op, tree) {
   PrefixTree.call(this, op, tree);
 }
 //----------------------------------------------------------------------
-util.inherits(PreDeccTree, PrefixTree);
-trees.push(PreDecTree);
+inherits(PreDecTree, PrefixTree);
 function PreDecTree(op, tree) {
   PrefixTree.call(this, op, tree);
 }
 
 //######################################################################
-util.inherits(PostfixTree, Tree);
-trees.push(PostfixTree);
+inherits(PostfixTree, Tree);
 function PostfixTree(op, tree) {
   Tree.call(this);
   this.op = op;
@@ -67,31 +77,31 @@ function PostfixTree(op, tree) {
 }
 
 //======================================================================
-PostfixTree.create = function create(op, expr) {
+PostfixTree.ctors = {
+  '++': PostIncTree,
+  '--': PostDecTree,
+}
+//----------------------------------------------------------------------
+PostfixTree.create = function create(op, tree) {
   var s = op + '';
-  switch (s) {
-    case '++': return new PostIncTree(op, tree);
-    case '--': return new PostDecTree(op, tree);
-    default: throw TypeError('Op: ' + op);
-  }
+  var ctor = PostfixTree.ctors[s];
+  if (ctor) return new ctor(op, tree);
+  throw TypeError('Op: ' + op);
 };
 
 //----------------------------------------------------------------------
-util.inherits(PostIncTree, PostfixTree);
-trees.push(PostIncTree);
+inherits(PostIncTree, PostfixTree);
 function PostIncTree(op, tree) {
   PostfixTree.call(this, op, tree);
 }
 //----------------------------------------------------------------------
-util.inherits(PostDecTree, PostfixTree);
-trees.push(PostDecTree);
+inherits(PostDecTree, PostfixTree);
 function PostDecTree(op, tree) {
   PostfixTree.call(this, op, tree);
 }
 
 //######################################################################
-util.inherits(BinTree, Tree);
-trees.push(BinTree);
+inherits(BinTree, Tree);
 function BinTree(op, tree1, tree2) {
   Tree.call(this);
   this.op = op;
@@ -105,7 +115,7 @@ BinTree.ctors = {
   '-':    SubTree,
   '*':    MulTree,
   '/':    DivTree,
-  '/':    ModTree,
+  '%':    ModTree,
   '=':    AssignTree,
   '+=':   AssignAddTree,
   '-=':   AssignSubTree,
@@ -115,10 +125,21 @@ BinTree.ctors = {
   '<<=':  AssignLogShiftLeftTree,
   '>>=':  AssignArithShiftRightTree,
   '>>>=': AssignLogShiftRightTree,
-  '&=':   AssignAndTree,
-  '^=':   AssignXorTree,
-  '|=':   AssignOrTree
+  '&=':   AssignBitAndTree,
+  '^=':   AssignBitXorTree,
+  '|=':   AssignBitOrTree,
+  '||':   LogOrTree,
+  '&&':   LogAndTree,
+  '|':    BitOrTree,
+  '^':    BitXorTree,
+  '&':    BitOrTree,
+  '?:':   Cond2Tree,
+  '==':   EqRelTree,
+  '===':  StrictEqRelTree,
+  '!=':   NotEqRelTree,
+  '!==':  StrictNotEqRelTree,
 };
+//----------------------------------------------------------------------
 BinTree.create = function create(op, tree1, tree2) {
   var s = op + '';
   var ctor = BinTree.ctors[s];
@@ -127,35 +148,159 @@ BinTree.create = function create(op, tree1, tree2) {
 };
 
 //----------------------------------------------------------------------
-util.inherits(AddTree, BinTree);
-trees.push(AddTree);
+inherits(AddTree, BinTree);
 function AddTree(op, tree1, tree2) {
   BinTree.call(this, op, tree1, tree2);
 }
 //----------------------------------------------------------------------
-util.inherits(SubTree, BinTree);
-trees.push(SubTree);
+inherits(SubTree, BinTree);
 function SubTree(op, tree1, tree2) {
   BinTree.call(this, op, tree1, tree2);
 }
 //----------------------------------------------------------------------
-util.inherits(MulTree, BinTree);
-trees.push(MulTree);
+inherits(MulTree, BinTree);
 function MulTree(op, tree1, tree2) {
   BinTree.call(this, op, tree1, tree2);
 }
 //----------------------------------------------------------------------
-util.inherits(DivTree, BinTree);
-trees.push(DivTree);
+inherits(DivTree, BinTree);
 function DivTree(op, tree1, tree2) {
   BinTree.call(this, op, tree1, tree2);
 }
 //----------------------------------------------------------------------
-util.inherits(AssignTree, BinTree);
-trees.push(AssignTree);
+inherits(ModTree, BinTree);
+function ModTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignTree, BinTree);
 function AssignTree(op, tree1, tree2) {
   BinTree.call(this, op, tree1, tree2);
 }
+//----------------------------------------------------------------------
+inherits(AssignAddTree, BinTree);
+function AssignAddTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignSubTree, BinTree);
+function AssignSubTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignMulTree, BinTree);
+function AssignMulTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignDivTree, BinTree);
+function AssignDivTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignModTree, BinTree);
+function AssignModTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignLogShiftLeftTree, BinTree);
+function AssignLogShiftLeftTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignArithShiftRightTree, BinTree);
+function AssignArithShiftRightTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignLogShiftRightTree, BinTree);
+function AssignLogShiftRightTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignBitAndTree, BinTree);
+function AssignBitAndTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignBitXorTree, BinTree);
+function AssignBitXorTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(AssignBitOrTree, BinTree);
+function AssignBitOrTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(LogOrTree, BinTree);
+function LogOrTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(LogAndTree, BinTree);
+function LogAndTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(BitAndTree, BinTree);
+function BitAndTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(BitXorTree, BinTree);
+function BitXorTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(BitOrTree, BinTree);
+function BitOrTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(Cond2Tree, BinTree);
+function Cond2Tree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(EqRelTree, BinTree);
+function EqRelTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(StrictEqRelTree, BinTree);
+function StrictEqRelTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(NotEqRelTree, BinTree);
+function NotEqRelTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+//----------------------------------------------------------------------
+inherits(StrictNotEqRelTree, BinTree);
+function StrictNotEqRelTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+/*
+//----------------------------------------------------------------------
+inherits(EqRelTree, BinTree);
+function EqRelTree(op, tree1, tree2) {
+  BinTree.call(this, op, tree1, tree2);
+}
+*/
+
+//######################################################################
+inherits(Cond3Tree, Tree);
+function Cond3Tree(op1, op2, tree1, tree2, tree3) {
+  Tree.call(this);
+  this.op1 = op1;
+  this.op2 = op2;
+  this.tree1 = tree1;
+  this.tree2 = tree2;
+  this.tree3 = tree3;
+}
+
 
 //----------------------------------------------------------------------
 exports = module.exports = Tree;

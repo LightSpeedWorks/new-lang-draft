@@ -19,6 +19,7 @@ var Tree = require('./tree');
 //                 | CondExpr
 // 15 CondExpr    := LogOrExpr
 //                 | LogOrExpr "?" CondExpr ":" CondExpr
+//                 | LogOrExpr "?:" CondExpr
 // 14 LogOrExpr   := LogAndExpr
 //                 | LogOrExpr "||" LogAndExpr
 // 13 LogAndExpr  := BitOrExpr

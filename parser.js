@@ -71,6 +71,14 @@ var Syntax = require('./syntax');
 //                  | "(" Expr ")"
 
 //######################################################################
+function dic(obj) {
+  var o = Object.create(null);
+  for (var i in obj)
+    o[i] = obj[i];
+  return o;
+}
+
+//######################################################################
 function Parser(lexer) {
   if (!(this instanceof Parser))
     return new Parser(lexer);
@@ -126,10 +134,10 @@ Parser.prototype.parseExpr = function parseExpr() {
 
 //######################################################################
 // parseAssignExpr: 式
-var assignOps = {
+var assignOps = dic({
   '=':1,   '+=':1,  '-=':1,   '*=':1, '/=':1, '%=':1,
   '<<=':1, '>>=':1, '>>>=':1, '&=':1, '^=':1, '|=':1
-};
+});
 Parser.prototype.parseAssignExpr = function parseAssignExpr() {
   var expr = this.parseYieldExpr();
   if (expr === null) return null;
@@ -169,22 +177,22 @@ Parser.prototype.parseCondExpr = function parseCondExpr() {
   if (s == '?') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseCondExpr();
-    if (expr2 === null) throw Error('? : 式1が無い'); // TODO: error
+    if (expr2 === null) throw Error('? : expression1 not found'); // TODO: error
 
     if (this.lexer.peek() == ':') {
       var op2 = this.lexer.read(); // skip op
       var expr3 = this.parseCondExpr();
-      if (expr3 === null) throw Error('? : 式2が無い'); // TODO: error
+      if (expr3 === null) throw Error('? : expression2 not found'); // TODO: error
 
       return new Syntax.Cond3Syntax(op, op2, expr, expr2, expr3);
     }
 
-    throw Error('? : コロンが無い');
+    throw Error('? : colon not found');
     // TODO: error
   } else if (s == '?:') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseCondExpr();
-    if (expr2 === null) throw Error('?: 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('?: expression not found'); // TODO: error
 
     return new Syntax.Cond2Syntax(op, expr, expr2);
   }
@@ -201,7 +209,7 @@ Parser.prototype.parseLogOrExpr = function parseLogOrExpr() {
   while (this.lexer.peek() == '||') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseLogAndExpr();
-    if (expr2 === null) throw Error('|| 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('|| expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
   }
 
@@ -217,7 +225,7 @@ Parser.prototype.parseLogAndExpr = function parseLogAndExpr() {
   while (this.lexer.peek() == '&&') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitOrExpr();
-    if (expr2 === null) throw Error('&& 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('&& expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
   }
 
@@ -233,7 +241,7 @@ Parser.prototype.parseBitOrExpr = function parseBitOrExpr() {
   while (this.lexer.peek() == '|') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitXorExpr();
-    if (expr2 === null) throw Error('| 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('| expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
   }
 
@@ -249,7 +257,7 @@ Parser.prototype.parseBitXorExpr = function parseBitXorExpr() {
   while (this.lexer.peek() == '^') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitAndExpr();
-    if (expr2 === null) throw Error('^ 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('^ expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
   }
 
@@ -265,7 +273,7 @@ Parser.prototype.parseBitAndExpr = function parseBitAndExpr() {
   while (this.lexer.peek() == '&') {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseEqRelExpr();
-    if (expr2 === null) throw Error('& 式が無い'); // TODO: error
+    if (expr2 === null) throw Error('& expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
   }
 
@@ -274,9 +282,9 @@ Parser.prototype.parseBitAndExpr = function parseBitAndExpr() {
 
 //######################################################################
 // parseEqRelExpr: 式
-var eqRelOps = {
+var eqRelOps = dic({
   '==':1, '!=':1, '===':1, '!==':1
-};
+});
 Parser.prototype.parseEqRelExpr = function parseEqRelExpr() {
   var expr = this.parseCompRelExpr();
   if (expr === null) return null;
@@ -286,7 +294,7 @@ Parser.prototype.parseEqRelExpr = function parseEqRelExpr() {
   while (s in eqRelOps) {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseCompRelExpr();
-    if (expr2 === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr2 === null) throw Error(s + ' expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
@@ -296,9 +304,9 @@ Parser.prototype.parseEqRelExpr = function parseEqRelExpr() {
 
 //######################################################################
 // parseCompRelExpr: 式
-var compRelOps = {
+var compRelOps = dic({
   '<':1, '<=':1, '>':1, '>=':1, 'in':1, 'instanceof':1
-};
+});
 Parser.prototype.parseCompRelExpr = function parseCompRelExpr() {
   var expr = this.parseBitShiftExpr();
   if (expr === null) return null;
@@ -308,7 +316,7 @@ Parser.prototype.parseCompRelExpr = function parseCompRelExpr() {
   while (s in compRelOps) {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseBitShiftExpr();
-    if (expr2 === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr2 === null) throw Error(s + ' expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
@@ -318,9 +326,9 @@ Parser.prototype.parseCompRelExpr = function parseCompRelExpr() {
 
 //######################################################################
 // parseBitShiftExpr: 式
-var bitShiftOps = {
+var bitShiftOps = dic({
   '<<':1, '>>':1, '>>>':1
-};
+});
 Parser.prototype.parseBitShiftExpr = function parseBitShiftExpr() {
   var expr = this.parseAddSubExpr();
   if (expr === null) return null;
@@ -330,7 +338,7 @@ Parser.prototype.parseBitShiftExpr = function parseBitShiftExpr() {
   while (s in bitShiftOps) {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseAddSubExpr();
-    if (expr2 === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr2 === null) throw Error(s + ' expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
@@ -340,9 +348,9 @@ Parser.prototype.parseBitShiftExpr = function parseBitShiftExpr() {
 
 //######################################################################
 // parseAddSubExpr: 式
-var addSubOps = {
+var addSubOps = dic({
   '+':1, '-':1
-};
+});
 Parser.prototype.parseAddSubExpr = function parseAddSubExpr() {
   var expr = this.parseMulDivExpr();
   if (expr === null) return null;
@@ -352,7 +360,7 @@ Parser.prototype.parseAddSubExpr = function parseAddSubExpr() {
   while (s in addSubOps) {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseMulDivExpr();
-    if (expr2 === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr2 === null) throw Error(s + ' expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
@@ -363,9 +371,9 @@ Parser.prototype.parseAddSubExpr = function parseAddSubExpr() {
 
 //######################################################################
 // parseMulDivExpr: 式
-var mulDivOps = {
+var mulDivOps = dic({
   '*':1, '/':1, '%':1
-};
+});
 Parser.prototype.parseMulDivExpr = function parseMulDivExpr() {
   var expr = this.parseMonoExpr();
   if (expr === null) return null;
@@ -375,7 +383,7 @@ Parser.prototype.parseMulDivExpr = function parseMulDivExpr() {
   while (s in mulDivOps) {
     var op = this.lexer.read(); // skip op
     var expr2 = this.parseMonoExpr();
-    if (expr2 === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr2 === null) throw Error(s + ' expression not found'); // TODO: error
     expr = Syntax.BinSyntax.create(op, expr, expr2);
     s = this.lexer.peek() + '';
   }
@@ -385,16 +393,16 @@ Parser.prototype.parseMulDivExpr = function parseMulDivExpr() {
 
 //######################################################################
 // parseMonoExpr: 式
-var monoOps = {
+var monoOps = dic({
   '!':1, '~':1, '+':1, '-':1, 'typeof':1, 'void':1, 'delete':1, 'sizeof':1
-};
+});
 Parser.prototype.parseMonoExpr = function parseMonoExpr() {
   var s = this.lexer.peek() + '';
 
   if (s in monoOps) {
     var op = this.lexer.read(); // skip op
     var expr = this.parseMonoExpr();
-    if (expr === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr === null) throw Error(s + ' expression not found'); // TODO: error
     return Syntax.PrefixSyntax.create(op, expr);
   }
 
@@ -403,14 +411,14 @@ Parser.prototype.parseMonoExpr = function parseMonoExpr() {
 
 //######################################################################
 // parseIncDecExpr: 式
-var incDecOps = {'++':1, '--':1};
+var incDecOps = dic({'++':1, '--':1});
 Parser.prototype.parseIncDecExpr = function parseIncDecExpr() {
   var s = this.lexer.peek() + '';
 
   if (s in incDecOps) {
     var op = this.lexer.read(); // skip op
     var expr = this.parseFuncCallExpr();
-    if (expr === null) throw Error(s + ' 式が無い'); // TODO: error
+    if (expr === null) throw Error(s + ' expression not found'); // TODO: error
     return Syntax.PrefixSyntax.create(op, expr);
   }
 
@@ -437,9 +445,9 @@ Parser.prototype.parseFuncCallExpr = function parseFuncCallExpr() {
     var s = ',';
     while (s === ',') {
       var arg = this.parseAssignExpr();
-      if (arg === null) throw new Error('FuncCall 引数の式が無い');
+      if (arg === null) throw new Error('FuncCall arguments expression not found');
       op = this.lexer.read();
-      if (op === null) throw new Error('FuncCall 引数の区切りまたは閉じ括弧が無い');
+      if (op === null) throw new Error('FuncCall arguments separator or close paren not found');
       s = op + '';
     }
 
@@ -452,14 +460,14 @@ Parser.prototype.parseFuncCallExpr = function parseFuncCallExpr() {
 
 //######################################################################
 // parseAccessExpr: 式
-var accessOps = {'.':1, '?.':1, '[':1, '->':1};
+var accessOps = dic({'.':1, '?.':1, '[':1, '->':1});
 Parser.prototype.parseAccessExpr = function parseAccessExpr() {
   var op = this.lexer.peek();
   var expr, expr2;
   if (op == 'new') {
      op = this.lexer.read(); // skip op
      expr = this.parseAccessExpr();
-     if (expr === null) throw new Error('new の後が無い');
+     if (expr === null) throw new Error('new unexpected EOF');
      return new Syntax.NewSyntax(expr);
   }
 
@@ -471,12 +479,12 @@ Parser.prototype.parseAccessExpr = function parseAccessExpr() {
   if (s in accessOps) {
     if (s === '[') {
       expr2 = this.parseExpr();
-      if (expr2 === null) throw new Error('[ 式が無い');
+      if (expr2 === null) throw new Error('[ expression not found');
       var op2 = this.lexer.read();
       if (op2 != ']') throw new Error('] expected');
     } else {
       expr2 = this.parseSymbol();
-      if (expr2 === null) throw new Error(s + ' シンボルが無い');
+      if (expr2 === null || !(expr2 instanceof Syntax.SymbolSyntax)) throw new Error(s + ' symbol not found');
     }
     return Syntax.AccessSyntax.create(op, expr, expr2);
   }
@@ -486,9 +494,9 @@ Parser.prototype.parseAccessExpr = function parseAccessExpr() {
 
 //######################################################################
 // parseCoreExpr: 式
-var coreTokens = {
+var coreTokens = dic({
   'NumToken':1, 'SymToken':1, 'StrToken':1
-};
+});
 Parser.prototype.parseCoreExpr = function parseCoreExpr() {
   var op = this.lexer.read();
   if (op === null) return null;
@@ -496,7 +504,7 @@ Parser.prototype.parseCoreExpr = function parseCoreExpr() {
 
   if (s === '(') {
     var expr = this.parseExpr();
-    if (expr === null) throw new Error('( 式が無い');
+    if (expr === null) throw new Error('( expression not found');
     op = this.lexer.read();
     if (op != ')') throw new Error(') expected');
     return new Syntax.ParenSyntax(expr);
@@ -507,6 +515,8 @@ Parser.prototype.parseCoreExpr = function parseCoreExpr() {
 
   return null;
 };
+
+Parser.prototype.parseSymbol = Parser.prototype.parseCoreExpr;
 
 //----------------------------------------------------------------------
 exports = module.exports = Parser;

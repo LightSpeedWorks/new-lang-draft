@@ -10,6 +10,14 @@ function inherits(ctor, superCtor) {
   classes.push(ctor);
 }
 
+//######################################################################
+function dic(obj) {
+  var o = Object.create(null);
+  for (var i in obj)
+    o[i] = obj[i];
+  return o;
+}
+
 // 実行して値を返す run
 // 実行直前の場所を返す locate
 //   symbol -> SymToken
@@ -75,7 +83,7 @@ function PrefixSyntax(prio, op, syntax) {
 }
 
 //======================================================================
-PrefixSyntax.ctors = {
+PrefixSyntax.ctors = dic({
   '++':     PreIncSyntax,
   '--':     PreDecSyntax,
   '+':      PlusSyntax,
@@ -87,13 +95,13 @@ PrefixSyntax.ctors = {
   'void':   VoidSyntax,
   'delete': DeleteSyntax,
   // sizeof
-}
+});
 //----------------------------------------------------------------------
 PrefixSyntax.create = function create(op, syntax) {
   var s = op + '';
   var ctor = PrefixSyntax.ctors[s];
   if (ctor) return new ctor(op, syntax);
-  throw TypeError('Op: ' + op);
+  throw TypeError('PrefixSyntax Op: ' + op);
 };
 
 //----------------------------------------------------------------------
@@ -164,7 +172,7 @@ function NewSyntax(op, syntax) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 NewSyntax.prototype.run = function run(env) {
   var func = this.syntax.run(env);
-  throw new Error('未実装');
+  throw new Error('NewSyntax not supported');
 }
 //----------------------------------------------------------------------
 inherits(TyepofSyntax, PrefixSyntax);
@@ -203,16 +211,16 @@ function PostfixSyntax(prio, op, syntax) {
 }
 
 //======================================================================
-PostfixSyntax.ctors = {
+PostfixSyntax.ctors = dic({
   '++': PostIncSyntax,
   '--': PostDecSyntax,
-}
+});
 //----------------------------------------------------------------------
 PostfixSyntax.create = function create(op, syntax) {
   var s = op + '';
   var ctor = PostfixSyntax.ctors[s];
   if (ctor) return new ctor(op, syntax);
-  throw TypeError('Op: ' + op);
+  throw TypeError('PostfixSyntax Op: ' + op);
 };
 
 //----------------------------------------------------------------------
@@ -250,7 +258,7 @@ function BinSyntax(prio, op, syntax1, syntax2) {
 }
 
 //======================================================================
-BinSyntax.ctors = {
+BinSyntax.ctors = dic({
   '+':    AddSyntax,
   '-':    SubSyntax,
   '*':    MulSyntax,
@@ -287,13 +295,13 @@ BinSyntax.ctors = {
   '?:':   Cond2Syntax,
   'in':          InSyntax,
   'instanceof':  InstanceofSyntax,
-};
+});
 //----------------------------------------------------------------------
 BinSyntax.create = function create(op, syntax1, syntax2) {
   var s = op + '';
   var ctor = BinSyntax.ctors[s];
   if (ctor) return new ctor(op, syntax1, syntax2);
-  throw TypeError('Op: ' + op);
+  throw TypeError('BinSyntax Op: ' + op);
 };
 
 //----------------------------------------------------------------------
@@ -660,7 +668,7 @@ function FuncCallSyntax(func, args) {
 FuncCallSyntax.prototype.run = function run(env) {
   var func = this.func.run(env);
   var args = this.args;
-  throw Error('未実装');
+  throw Error('FuncCallSyntax not supported');
 }
 
 //######################################################################
@@ -670,18 +678,18 @@ function AccessSyntax(op, syntax1, syntax2) {
 }
 
 //======================================================================
-AccessSyntax.ctors = {
+AccessSyntax.ctors = dic({
   '.':  AccessDotSyntax,
   '?.': AccessWeakDotSyntax,
   '[':  AccessGetSetSyntax,
   '->': AccessThinArrowSyntax,
-};
+});
 //----------------------------------------------------------------------
 AccessSyntax.create = function create(op, syntax1, syntax2) {
   var s = op + '';
   var ctor = AccessSyntax.ctors[s];
   if (ctor) return new ctor(op, syntax1, syntax2);
-  throw TypeError('Op: ' + op);
+  throw TypeError('AccessSyntax Op: ' + op);
 };
 
 //----------------------------------------------------------------------
@@ -693,7 +701,7 @@ function AccessDotSyntax(op, syntax1, syntax2) {
 AccessDotSyntax.prototype.locate = function locate(env) {
   var access = this.syntax1.run(env);
   var propertyName = this.syntax2 + '';
-  throw new Error('未実装');
+  throw new Error('AccessDotSyntax not supported');
 }
 //----------------------------------------------------------------------
 inherits(AccessWeakDotSyntax, AccessSyntax);
@@ -704,7 +712,7 @@ function AccessWeakDotSyntax(op, syntax1, syntax2) {
 AccessWeakDotSyntax.prototype.locate = function locate(env) {
   var access = this.syntax1.run(env);
   var propertyName = this.syntax2 + '';
-  throw new Error('未実装');
+  throw new Error('AccessWeakDotSyntax not supported');
 }
 //----------------------------------------------------------------------
 inherits(AccessGetSetSyntax, AccessSyntax);
@@ -715,7 +723,7 @@ function AccessGetSetSyntax(op, syntax1, syntax2) {
 AccessGetSetSyntax.prototype.locate = function locate(env) {
   var access = this.syntax1.run(env);
   var propertyName = this.syntax2.run(env) + '';
-  throw new Error('未実装');
+  throw new Error('AccessGetSetSyntax not supported');
 }
 //----------------------------------------------------------------------
 inherits(AccessThinArrowSyntax, AccessSyntax);
@@ -726,7 +734,7 @@ function AccessThinArrowSyntax(op, syntax1, syntax2) {
 AccessThinArrowSyntax.prototype.locate = function locate(env) {
   var access = this.syntax1.run(env);
   var propertyName = this.syntax2 + '';
-  throw new Error('未実装');
+  throw new Error('AccessThinArrowSyntax not supported');
 }
 
 //######################################################################
@@ -737,16 +745,16 @@ function CoreSyntax(token) {
 }
 
 //======================================================================
-CoreSyntax.ctors = {
+CoreSyntax.ctors = dic({
   'NumToken':  NumberSyntax,
   'StrToken':  StringSyntax,
   'SymToken':  SymbolSyntax,
-};
+});
 //----------------------------------------------------------------------
 CoreSyntax.create = function create(token) {
   var ctor = CoreSyntax.ctors[token.constructor.name];
   if (ctor) return new ctor(token);
-  throw TypeError('Token: ' + token);
+  throw TypeError('CoreSyntax Token: ' + token);
 };
 
 //----------------------------------------------------------------------
@@ -773,18 +781,21 @@ function SymbolSyntax(token) {
   CoreSyntax.call(this, token);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-SymbolSyntax.reservedGlobalConstants = {
+SymbolSyntax.reservedGlobalConstants = dic({
   'null': null,
   'undefined': undefined,
   'true': true,
   'false': false,
-}
+});
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SymbolSyntax.prototype.run = function run(env) {
+
+console.log(require('util').inspect(this));
+
   var s = this.token.string;
   if (s in SymbolSyntax.reservedGlobalConstants)
     return SymbolSyntax.reservedGlobalConstants[s];
-  throw new Error('未実装');
+  throw new Error('Symbol run not supported');
 }
 
 //----------------------------------------------------------------------

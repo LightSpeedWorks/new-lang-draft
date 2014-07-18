@@ -13,7 +13,7 @@ args.shift();
 
 var fileName = args.shift();
 
-fileName = fileName || 'a.nl'; // *** DEFAULT FILE NAME FOR TEST
+fileName = fileName || 'test-lexer.nl'; // *** DEFAULT FILE NAME FOR TEST
 //console.log(util.inspect(args, {colors:true}));
 
 // ファイルを読んで

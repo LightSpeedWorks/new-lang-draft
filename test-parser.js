@@ -34,6 +34,7 @@ fs.readFile(fileName, function (err, contents) {
   var syntax;
   while (syntax = parser.parseStatement()) {
     console.log(util.inspect(syntax, {colors: true, depth: null}));
+    console.log('###### ' + syntax + '');
     console.log('### -> ' + util.inspect(syntax.run(null), {colors: true, depth: null}));
     console.log();
   }

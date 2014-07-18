@@ -119,13 +119,24 @@ Parser.prototype.parseStatement = function parseStatement() {
 Parser.prototype.parseExpr = function parseExpr() {
   var expr = this.parseAssignExpr();
   if (expr === null) return null;
-  var exprs = [expr];
+  var exprs = [];
+  if (expr instanceof Syntax.CommaSyntax) {
+    for (var i in expr.syntaxes)
+      exprs.push(expr.syntaxes[i]);
+  } else {
+    exprs.push(expr);
+  }
 
   while (this.lexer.peek() == ',') {
     this.lexer.read(); // skip op
     expr = this.parseAssignExpr();
     if (expr === null) break;
-    exprs.push(expr);
+    if (expr instanceof Syntax.CommaSyntax) {
+      for (var i in expr.syntaxes)
+        exprs.push(expr.syntaxes[i]);
+    } else {
+      exprs.push(expr);
+    }
   }
 
   if (exprs.length === 1) return exprs[0];
@@ -446,6 +457,7 @@ Parser.prototype.parseFuncCallExpr = function parseFuncCallExpr() {
     while (s === ',') {
       var arg = this.parseAssignExpr();
       if (arg === null) throw new Error('FuncCall arguments expression not found');
+      args.push(arg);
       op = this.lexer.read();
       if (op === null) throw new Error('FuncCall arguments separator or close paren not found');
       s = op + '';
@@ -507,7 +519,7 @@ Parser.prototype.parseCoreExpr = function parseCoreExpr() {
     if (expr === null) throw new Error('( expression not found');
     op = this.lexer.read();
     if (op != ')') throw new Error(') expected');
-    return new Syntax.ParenSyntax(expr);
+    return expr;
   }
 
   if (op.constructor.name in coreTokens)

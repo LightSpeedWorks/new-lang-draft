@@ -46,6 +46,13 @@ BlockSyntax.prototype.run = function run(env) {
     val = this.syntaxes[i].run(env);
   return val;
 }
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+BlockSyntax.prototype.toString = function toString() {
+  var s = '{';
+  for (var i = 0, n = this.syntaxes.length; i < n; ++i)
+    s += this.syntaxes[i].toString() + '; ';
+  return s + '}';
+}
 
 //######################################################################
 // 式, ...
@@ -61,6 +68,17 @@ CommaSyntax.prototype.run = function run(env) {
     val = this.syntaxes[i].run(env);
   return val;
 }
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+CommaSyntax.prototype.toString = function toString() {
+  var s = '';
+  for (var i = 0, n = this.syntaxes.length; i < n; ++i) {
+    if (this.syntaxes[i].prio >= this.prio) s += '(';
+    s += this.syntaxes[i].toString();
+    if (this.syntaxes[i].prio >= this.prio) s += ')';
+    if (i != n - 1) s += ', ';
+  }
+  return s;
+}
 
 //######################################################################
 // (式)
@@ -72,6 +90,10 @@ function ParenSyntax(syntax) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ParenSyntax.prototype.run = function run(env) {
   return this.syntax.run(env);
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ParenSyntax.prototype.toString = function toString() {
+  return '(' + this.syntax.toString() + ')';
 }
 
 //######################################################################
@@ -103,6 +125,17 @@ PrefixSyntax.create = function create(op, syntax) {
   if (ctor) return new ctor(op, syntax);
   throw TypeError('PrefixSyntax Op: ' + op);
 };
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PrefixSyntax.prototype.toString = function toString() {
+  var op = this.op.toString();
+  var z = op.slice(-1);
+  if (z.match(/[a-z]/i))
+    op += ' ';
+
+  var expr = this.syntax.toString();
+  if (this.prio < this.syntax.prio) expr = '(' + expr + ')';
+  return op + expr;
+}
 
 //----------------------------------------------------------------------
 inherits(PreIncSyntax, PrefixSyntax);
@@ -222,6 +255,14 @@ PostfixSyntax.create = function create(op, syntax) {
   if (ctor) return new ctor(op, syntax);
   throw TypeError('PostfixSyntax Op: ' + op);
 };
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PostfixSyntax.prototype.toString = function toString() {
+  var op = this.op.toString();
+
+  var expr = this.syntax.toString();
+  if (this.prio < this.syntax.prio) expr = '(' + expr + ')';
+  return expr + op;
+}
 
 //----------------------------------------------------------------------
 inherits(PostIncSyntax, PostfixSyntax);
@@ -303,6 +344,19 @@ BinSyntax.create = function create(op, syntax1, syntax2) {
   if (ctor) return new ctor(op, syntax1, syntax2);
   throw TypeError('BinSyntax Op: ' + op);
 };
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+BinSyntax.prototype.toString = function toString() {
+  var op = this.op.toString();
+  var z = op.slice(-1);
+  if (z.match(/[a-z]/i))
+    op = ' ' + op + ' ';
+
+  var expr1 = this.syntax1.toString();
+  if (this.prio < this.syntax1.prio) expr1 = '(' + expr1 + ')';
+  var expr2 = this.syntax2.toString();
+  if (this.prio < this.syntax2.prio) expr2 = '(' + expr2 + ')';
+  return expr1 + op + expr2;
+}
 
 //----------------------------------------------------------------------
 inherits(AddSyntax, BinSyntax);
@@ -656,6 +710,19 @@ function Cond3Syntax(op1, op2, syntax1, syntax2, syntax3) {
 Cond3Syntax.prototype.run = function run(env) {
   return this.syntax1.run(env) ? this.syntax2.run(env) : this.syntax3.run(env);
 }
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Cond3Syntax.prototype.toString = function toString() {
+  var op1 = this.op1.toString();
+  var op2 = this.op2.toString();
+
+  var expr1 = this.syntax1.toString();
+  if (this.prio < this.syntax1.prio) expr1 = '(' + expr1 + ')';
+  var expr2 = this.syntax2.toString();
+  if (this.prio < this.syntax2.prio) expr2 = '(' + expr2 + ')';
+  var expr3 = this.syntax2.toString();
+  if (this.prio < this.syntax3.prio) expr3 = '(' + expr3 + ')';
+  return expr1 + op1 + expr2 + op2;
+}
 
 //######################################################################
 inherits(FuncCallSyntax, Syntax);
@@ -669,6 +736,22 @@ FuncCallSyntax.prototype.run = function run(env) {
   var func = this.func.run(env);
   var args = this.args;
   throw Error('FuncCallSyntax not supported');
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+FuncCallSyntax.prototype.toString = function toString() {
+  var s = this.func.toString();
+  if (this.args.length === 0)
+    return s + '()';
+
+  s += '(';
+  for (var i = 0, n = this.args.length; i < n; ++i) {
+    if (this.args[i].prio >= 180) s += '(';
+    s += this.args[i].toString();
+    if (this.args[i].prio >= 180) s += ')';
+    if (i !== n - 1) s += ', ';
+  }
+  s += ')';
+  return s;
 }
 
 //######################################################################
@@ -756,6 +839,10 @@ CoreSyntax.create = function create(token) {
   if (ctor) return new ctor(token);
   throw TypeError('CoreSyntax Token: ' + token);
 };
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+CoreSyntax.prototype.toString = function toString() {
+  return this.token.toString();
+}
 
 //----------------------------------------------------------------------
 inherits(NumberSyntax, CoreSyntax);
@@ -789,9 +876,6 @@ SymbolSyntax.reservedGlobalConstants = dic({
 });
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SymbolSyntax.prototype.run = function run(env) {
-
-console.log(require('util').inspect(this));
-
   var s = this.token.string;
   if (s in SymbolSyntax.reservedGlobalConstants)
     return SymbolSyntax.reservedGlobalConstants[s];

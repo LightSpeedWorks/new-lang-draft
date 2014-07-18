@@ -70,7 +70,7 @@ Lexer.prototype.read = function read() {
     ch = this.reader.read();
     if (ch === null) return null; // EOF
   }
-  var pos = [this.reader.line, this.reader.column - 1, this.reader.file];
+  var pos = [this.reader.line, this.reader.column - 1]; //, this.reader.file];
   this.reader.unread(ch);
 
   var token = this._read();

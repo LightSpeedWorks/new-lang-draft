@@ -7,68 +7,68 @@ var Syntax = require('./syntax');
 // http://ja.wikipedia.org/wiki/演算子の優先順位
 // http://www.bohyoh.com/CandCPP/C/operator.html
 // http://ja.cppreference.com/w/cpp/language/operator_precedence
-// Block          := Statement ...
-// Statement      := Expr ";"
-//                 | Expr "\n"
-//                 | label ":" Statement
-// 18 Expr        := AssignExpr
-//                 | Expr "," AssignExpr
-// 17 AssignExpr  := YieldExpr
-//                 | YieldExpr "=" AssignExpr
-//                   =  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
-// 16 YieldExpr   := "yield" YieldExpr
-//                 | CondExpr
-// 15 CondExpr    := LogOrExpr
-//                 | LogOrExpr "?" CondExpr ":" CondExpr
-//                 | LogOrExpr "?:" CondExpr
-// 14 LogOrExpr   := LogAndExpr
-//                 | LogOrExpr "||" LogAndExpr
-// 13 LogAndExpr  := BitOrExpr
-//                 | LogAndExpr "&&" BitOrExpr
-// 12 BitOrExpr   := BitXorExpr
-//                 | BitOrExpr "|" BitXorExpr
-// 11 BitXorExpr  := BitAndExpr
-//                 | BitXorExpr "^" BitAndExpr
-// 10 BitAndExpr  := EqRelExpr
-//                 | BitAndExpr "&" EqRelExpr
-// 9 EqRelExpr    := CompRelExpr
-//                 | EqRelExpr "==" CompRelExpr
-//                   == != === !==
-// 8 CompRelExpr  := BitShiftExpr
-//                 | CompRelExpr "<" BitShiftExpr
-//                   < <= > >= in instanceof (is as)
-// 7 BitShiftExpr := AddSubExpr
-//                 | BitShiftExpr "<<" AddSubExpr
-//                 | BitShiftExpr ">>" AddSubExpr
-//                 | BitShiftExpr ">>>" AddSubExpr
-// 6 AddSubExpr   := MulDivExpr
-//                 | AddSubExpr "+" MulDivExpr
-//                 | AddSubExpr "-" MulDivExpr
-// 5 MulDivExpr   := MonoExpr
-//                 | MulDivExpr "*" MonoExpr
-//                 | MulDivExpr "/" MonoExpr
-//                 | MulDivExpr "%" MonoExpr
-// 4 MonoExpr      := IncDecExpr
-//                 | "!" MonoExpr
-//                   ! ~ + - typeof void delete sizeof (cast) & * (new checkd unchecked)
-// 3 IncDecExpr   := FuncCallExpr
-//                 | FuncCallExpr "++"
-//                 | FuncCallExpr "--"
-//                 | "++" FuncCallExpr
-//                 | "--" FuncCallExpr
+// 200 Block       := Statement ...
+// 190 Statement   := Expr ";"
+//                  | Expr "\n"
+//                  | label ":" Statement
+// 180 Expr        := AssignExpr
+//                  | Expr "," AssignExpr
+// 170 AssignExpr  := YieldExpr
+//                  | YieldExpr "=" AssignExpr
+//                    =  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
+// 160 YieldExpr   := "yield" YieldExpr
+//                  | CondExpr
+// 150 CondExpr    := LogOrExpr
+//                  | LogOrExpr "?" CondExpr ":" CondExpr
+//                  | LogOrExpr "?:" CondExpr
+// 140 LogOrExpr   := LogAndExpr
+//                  | LogOrExpr "||" LogAndExpr
+// 130 LogAndExpr  := BitOrExpr
+//                  | LogAndExpr "&&" BitOrExpr
+// 120 BitOrExpr   := BitXorExpr
+//                  | BitOrExpr "|" BitXorExpr
+// 110 BitXorExpr  := BitAndExpr
+//                  | BitXorExpr "^" BitAndExpr
+// 100 BitAndExpr  := EqRelExpr
+//                  | BitAndExpr "&" EqRelExpr
+// 90 EqRelExpr    := CompRelExpr
+//                  | EqRelExpr "==" CompRelExpr
+//                    == != === !==
+// 80 CompRelExpr  := BitShiftExpr
+//                  | CompRelExpr "<" BitShiftExpr
+//                    < <= > >= in instanceof (is as)
+// 70 BitShiftExpr := AddSubExpr
+//                  | BitShiftExpr "<<" AddSubExpr
+//                  | BitShiftExpr ">>" AddSubExpr
+//                  | BitShiftExpr ">>>" AddSubExpr
+// 60 AddSubExpr   := MulDivExpr
+//                  | AddSubExpr "+" MulDivExpr
+//                  | AddSubExpr "-" MulDivExpr
+// 50 MulDivExpr   := MonoExpr
+//                  | MulDivExpr "*" MonoExpr
+//                  | MulDivExpr "/" MonoExpr
+//                  | MulDivExpr "%" MonoExpr
+// 40 MonoExpr     := IncDecExpr
+//                  | "!" MonoExpr
+//                    ! ~ + - typeof void delete sizeof (cast) & * (new checkd unchecked)
+// 30 IncDecExpr   := FuncCallExpr
+//                  | FuncCallExpr "++"
+//                  | FuncCallExpr "--"
+//                  | "++" FuncCallExpr
+//                  | "--" FuncCallExpr
 // **
-// 2 FuncCallExpr := AccessExpr
-//                 | AccessExpr "(" AssignExpr "," ... ")"
-// 1 AccessExpr   := CoreExpr
-//                 | "new" AccessExpr
-//                 | AccessExpr "." Symbol
-//                 | AccessExpr "?." Symbol
-//                 | AccessExpr "[" Expr "]"
-//                 | AccessExpr "->" Symbol
-// 0 CoreExpr     := Number
-//                 | Symbol
-//                 | String
-//                 | "(" Expr ")"
+// 20 FuncCallExpr := AccessExpr
+//                  | AccessExpr "(" AssignExpr "," ... ")"
+// 10 AccessExpr   := CoreExpr
+//                  | "new" AccessExpr
+//                  | AccessExpr "." Symbol
+//                  | AccessExpr "?." Symbol
+//                  | AccessExpr "[" Expr "]"
+//                  | AccessExpr "->" Symbol
+// 0 CoreExpr      := Number
+//                  | Symbol
+//                  | String
+//                  | "(" Expr ")"
 
 //######################################################################
 function Parser(lexer) {

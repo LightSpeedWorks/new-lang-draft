@@ -19,15 +19,16 @@ function inherits(ctor, superCtor) {
 
 //######################################################################
 classes.push(Syntax);
-function Syntax() {
+function Syntax(prio) {
   this['class'] = this.constructor.name;
+  this.prio = prio;
 }
 
 //######################################################################
 // {文; ...}
 inherits(BlockSyntax, Syntax);
 function BlockSyntax(syntaxes) {
-  Syntax.call(this);
+  Syntax.call(this, 200);
   this.syntaxes = syntaxes;
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,7 +43,7 @@ BlockSyntax.prototype.run = function run(env) {
 // 式, ...
 inherits(CommaSyntax, Syntax);
 function CommaSyntax(syntaxes) {
-  Syntax.call(this);
+  Syntax.call(this, 180);
   this.syntaxes = syntaxes;
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -57,7 +58,7 @@ CommaSyntax.prototype.run = function run(env) {
 // (式)
 inherits(ParenSyntax, Syntax);
 function ParenSyntax(syntax) {
-  Syntax.call(this);
+  Syntax.call(this, 0);
   this.syntax = syntax;
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -67,21 +68,21 @@ ParenSyntax.prototype.run = function run(env) {
 
 //######################################################################
 inherits(PrefixSyntax, Syntax);
-function PrefixSyntax(op, syntax) {
-  Syntax.call(this);
+function PrefixSyntax(prio, op, syntax) {
+  Syntax.call(this, prio);
   this.op = op;
   this.syntax = syntax;
 }
 
 //======================================================================
 PrefixSyntax.ctors = {
-  '++':  PreIncSyntax,
-  '--':  PreDecSyntax,
-  '+':   PlusSyntax,
-  '-':   MinusSyntax,
-  '!':   LogNotSyntax,
-  '~':   BitNotSyntax,
-  'new': NewSyntax,
+  '++':     PreIncSyntax,
+  '--':     PreDecSyntax,
+  '+':      PlusSyntax,
+  '-':      MinusSyntax,
+  '!':      LogNotSyntax,
+  '~':      BitNotSyntax,
+  'new':    NewSyntax,
   'typeof': TyepofSyntax,
   'void':   VoidSyntax,
   'delete': DeleteSyntax,
@@ -98,7 +99,7 @@ PrefixSyntax.create = function create(op, syntax) {
 //----------------------------------------------------------------------
 inherits(PreIncSyntax, PrefixSyntax);
 function PreIncSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 30, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PreIncSyntax.prototype.run = function run(env) {
@@ -110,7 +111,7 @@ PreIncSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(PreDecSyntax, PrefixSyntax);
 function PreDecSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 30, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PreDecSyntax.prototype.run = function run(env) {
@@ -122,7 +123,7 @@ PreDecSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(PlusSyntax, PrefixSyntax);
 function PlusSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PlusSyntax.prototype.run = function run(env) {
@@ -131,7 +132,7 @@ PlusSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(MinusSyntax, PrefixSyntax);
 function MinusSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MinusSyntax.prototype.run = function run(env) {
@@ -140,7 +141,7 @@ MinusSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LogNotSyntax, PrefixSyntax);
 function LogNotSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LogNotSyntax.prototype.run = function run(env) {
@@ -149,7 +150,7 @@ LogNotSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(BitNotSyntax, PrefixSyntax);
 function BitNotSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BitNotSyntax.prototype.run = function run(env) {
@@ -158,7 +159,7 @@ BitNotSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(NewSyntax, PrefixSyntax);
 function NewSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 10, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 NewSyntax.prototype.run = function run(env) {
@@ -168,7 +169,7 @@ NewSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(TyepofSyntax, PrefixSyntax);
 function TyepofSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TyepofSyntax.prototype.run = function run(env) {
@@ -177,7 +178,7 @@ TyepofSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(VoidSyntax, PrefixSyntax);
 function VoidSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 VoidSyntax.prototype.run = function run(env) {
@@ -186,7 +187,7 @@ VoidSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(DeleteSyntax, PrefixSyntax);
 function DeleteSyntax(op, syntax) {
-  PrefixSyntax.call(this, op, syntax);
+  PrefixSyntax.call(this, 40, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 DeleteSyntax.prototype.run = function run(env) {
@@ -195,8 +196,8 @@ DeleteSyntax.prototype.run = function run(env) {
 
 //######################################################################
 inherits(PostfixSyntax, Syntax);
-function PostfixSyntax(op, syntax) {
-  Syntax.call(this);
+function PostfixSyntax(prio, op, syntax) {
+  Syntax.call(this, prio);
   this.op = op;
   this.syntax = syntax;
 }
@@ -217,7 +218,7 @@ PostfixSyntax.create = function create(op, syntax) {
 //----------------------------------------------------------------------
 inherits(PostIncSyntax, PostfixSyntax);
 function PostIncSyntax(op, syntax) {
-  PostfixSyntax.call(this, op, syntax);
+  PostfixSyntax.call(this, 30, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PostIncSyntax.prototype.run = function run(env) {
@@ -229,7 +230,7 @@ PostIncSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(PostDecSyntax, PostfixSyntax);
 function PostDecSyntax(op, syntax) {
-  PostfixSyntax.call(this, op, syntax);
+  PostfixSyntax.call(this, 30, op, syntax);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PostDecSyntax.prototype.run = function run(env) {
@@ -241,8 +242,8 @@ PostDecSyntax.prototype.run = function run(env) {
 
 //######################################################################
 inherits(BinSyntax, Syntax);
-function BinSyntax(op, syntax1, syntax2) {
-  Syntax.call(this);
+function BinSyntax(prio, op, syntax1, syntax2) {
+  Syntax.call(this, prio);
   this.op = op;
   this.syntax1 = syntax1;
   this.syntax2 = syntax2;
@@ -298,7 +299,7 @@ BinSyntax.create = function create(op, syntax1, syntax2) {
 //----------------------------------------------------------------------
 inherits(AddSyntax, BinSyntax);
 function AddSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 60, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AddSyntax.prototype.run = function run(env) {
@@ -307,7 +308,7 @@ AddSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(SubSyntax, BinSyntax);
 function SubSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 60, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SubSyntax.prototype.run = function run(env) {
@@ -316,7 +317,7 @@ SubSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(MulSyntax, BinSyntax);
 function MulSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 50, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MulSyntax.prototype.run = function run(env) {
@@ -325,7 +326,7 @@ MulSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(DivSyntax, BinSyntax);
 function DivSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 50, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 DivSyntax.prototype.run = function run(env) {
@@ -334,7 +335,7 @@ DivSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(ModSyntax, BinSyntax);
 function ModSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 50, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ModSyntax.prototype.run = function run(env) {
@@ -343,7 +344,7 @@ ModSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignSyntax, BinSyntax);
 function AssignSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignSyntax.prototype.run = function run(env) {
@@ -352,7 +353,7 @@ AssignSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignAddSyntax, BinSyntax);
 function AssignAddSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignAddSyntax.prototype.run = function run(env) {
@@ -362,7 +363,7 @@ AssignAddSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignSubSyntax, BinSyntax);
 function AssignSubSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignSubSyntax.prototype.run = function run(env) {
@@ -372,7 +373,7 @@ AssignSubSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignMulSyntax, BinSyntax);
 function AssignMulSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignMulSyntax.prototype.run = function run(env) {
@@ -382,7 +383,7 @@ AssignMulSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignDivSyntax, BinSyntax);
 function AssignDivSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignDivSyntax.prototype.run = function run(env) {
@@ -392,7 +393,7 @@ AssignDivSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignModSyntax, BinSyntax);
 function AssignModSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignModSyntax.prototype.run = function run(env) {
@@ -402,7 +403,7 @@ AssignModSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignLogShiftLeftSyntax, BinSyntax);
 function AssignLogShiftLeftSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignLogShiftLeftSyntax.prototype.run = function run(env) {
@@ -412,7 +413,7 @@ AssignLogShiftLeftSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignArithShiftRightSyntax, BinSyntax);
 function AssignArithShiftRightSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignArithShiftRightSyntax.prototype.run = function run(env) {
@@ -422,7 +423,7 @@ AssignArithShiftRightSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignLogShiftRightSyntax, BinSyntax);
 function AssignLogShiftRightSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignLogShiftRightSyntax.prototype.run = function run(env) {
@@ -432,7 +433,7 @@ AssignLogShiftRightSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignBitAndSyntax, BinSyntax);
 function AssignBitAndSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignBitAndSyntax.prototype.run = function run(env) {
@@ -442,7 +443,7 @@ AssignBitAndSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignBitXorSyntax, BinSyntax);
 function AssignBitXorSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignBitXorSyntax.prototype.run = function run(env) {
@@ -452,7 +453,7 @@ AssignBitXorSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(AssignBitOrSyntax, BinSyntax);
 function AssignBitOrSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 170, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 AssignBitOrSyntax.prototype.run = function run(env) {
@@ -462,7 +463,7 @@ AssignBitOrSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LogOrSyntax, BinSyntax);
 function LogOrSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 140, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LogOrSyntax.prototype.run = function run(env) {
@@ -471,7 +472,7 @@ LogOrSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LogAndSyntax, BinSyntax);
 function LogAndSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 130, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LogAndSyntax.prototype.run = function run(env) {
@@ -480,7 +481,7 @@ LogAndSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(BitAndSyntax, BinSyntax);
 function BitAndSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 100, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BitAndSyntax.prototype.run = function run(env) {
@@ -489,7 +490,7 @@ BitAndSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(BitXorSyntax, BinSyntax);
 function BitXorSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 110, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BitXorSyntax.prototype.run = function run(env) {
@@ -498,7 +499,7 @@ BitXorSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(BitOrSyntax, BinSyntax);
 function BitOrSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 120, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BitOrSyntax.prototype.run = function run(env) {
@@ -507,7 +508,7 @@ BitOrSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(EqRelSyntax, BinSyntax);
 function EqRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 90, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 EqRelSyntax.prototype.run = function run(env) {
@@ -516,7 +517,7 @@ EqRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(StrictEqRelSyntax, BinSyntax);
 function StrictEqRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 90, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 StrictEqRelSyntax.prototype.run = function run(env) {
@@ -525,7 +526,7 @@ StrictEqRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(NotEqRelSyntax, BinSyntax);
 function NotEqRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 90, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 NotEqRelSyntax.prototype.run = function run(env) {
@@ -534,7 +535,7 @@ NotEqRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(StrictNotEqRelSyntax, BinSyntax);
 function StrictNotEqRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 90, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 StrictNotEqRelSyntax.prototype.run = function run(env) {
@@ -543,7 +544,7 @@ StrictNotEqRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LtRelSyntax, BinSyntax);
 function LtRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LtRelSyntax.prototype.run = function run(env) {
@@ -552,7 +553,7 @@ LtRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LeRelSyntax, BinSyntax);
 function LeRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LeRelSyntax.prototype.run = function run(env) {
@@ -561,7 +562,7 @@ LeRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(GtRelSyntax, BinSyntax);
 function GtRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GtRelSyntax.prototype.run = function run(env) {
@@ -570,7 +571,7 @@ GtRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(GeRelSyntax, BinSyntax);
 function GeRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GeRelSyntax.prototype.run = function run(env) {
@@ -579,7 +580,7 @@ GeRelSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LogShiftLeftSyntax, BinSyntax);
 function LogShiftLeftSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 70, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LogShiftLeftSyntax.prototype.run = function run(env) {
@@ -588,7 +589,7 @@ LogShiftLeftSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(ArithShiftRightSyntax, BinSyntax);
 function ArithShiftRightSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 70, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ArithShiftRightSyntax.prototype.run = function run(env) {
@@ -597,7 +598,7 @@ ArithShiftRightSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(LogShiftRightSyntax, BinSyntax);
 function LogShiftRightSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 70, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LogShiftRightSyntax.prototype.run = function run(env) {
@@ -606,7 +607,7 @@ LogShiftRightSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(Cond2Syntax, BinSyntax);
 function Cond2Syntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 150, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Cond2Syntax.prototype.run = function run(env) {
@@ -617,7 +618,7 @@ Cond2Syntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(InSyntax, BinSyntax);
 function InSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 InSyntax.prototype.run = function run(env) {
@@ -626,24 +627,17 @@ InSyntax.prototype.run = function run(env) {
 //----------------------------------------------------------------------
 inherits(InstanceofSyntax, BinSyntax);
 function InstanceofSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
+  BinSyntax.call(this, 80, op, syntax1, syntax2);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 InstanceofSyntax.prototype.run = function run(env) {
   return this.syntax1.run(env) instanceof this.syntax2.run(env);
 }
-/*
-//----------------------------------------------------------------------
-inherits(EqRelSyntax, BinSyntax);
-function EqRelSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, syntax1, syntax2);
-}
-*/
 
 //######################################################################
 inherits(Cond3Syntax, Syntax);
 function Cond3Syntax(op1, op2, syntax1, syntax2, syntax3) {
-  Syntax.call(this);
+  Syntax.call(this, 150);
   this.op1 = op1;
   this.op2 = op2;
   this.syntax1 = syntax1;
@@ -658,7 +652,7 @@ Cond3Syntax.prototype.run = function run(env) {
 //######################################################################
 inherits(FuncCallSyntax, Syntax);
 function FuncCallSyntax(func, args) {
-  Syntax.call(this);
+  Syntax.call(this, 20);
   this.func = func;
   this.args = args;
 }
@@ -672,7 +666,7 @@ FuncCallSyntax.prototype.run = function run(env) {
 //######################################################################
 inherits(AccessSyntax, BinSyntax);
 function AccessSyntax(op, syntax1, syntax2) {
-  BinSyntax.call(this, op, symtax1, syntax2);
+  BinSyntax.call(this, 10, op, syntax1, syntax2);
 }
 
 //======================================================================
@@ -735,13 +729,10 @@ AccessThinArrowSyntax.prototype.locate = function locate(env) {
   throw new Error('未実装');
 }
 
-
-
-
 //######################################################################
 inherits(CoreSyntax, Syntax);
 function CoreSyntax(token) {
-  Syntax.call(this);
+  Syntax.call(this, 0);
   this.token = token;
 }
 

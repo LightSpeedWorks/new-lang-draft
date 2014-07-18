@@ -2,7 +2,16 @@
 
 var util = require('util');
 
+var classes = [];
+
 //######################################################################
+function inherits(ctor, superCtor) {
+  util.inherits(ctor, superCtor);
+  classes.push(ctor);
+}
+
+//######################################################################
+classes.push(Token);
 function Token(type, string) {
   if (!(this instanceof Token))
     return new Token(type, string);
@@ -21,25 +30,25 @@ Token.prototype.toString = function toString() {
 }
 
 //######################################################################
-util.inherits(OpeToken, Token);
+inherits(OpeToken, Token);
 function OpeToken(string) {
   Token.call(this, 'ope', string);
 }
 
 //######################################################################
-util.inherits(SymToken, Token);
+inherits(SymToken, Token);
 function SymToken(string) {
   Token.call(this, 'sym', string);
 }
 
 //######################################################################
-util.inherits(SepToken, Token);
+inherits(SepToken, Token);
 function SepToken(string) {
   Token.call(this, 'sep', string);
 }
 
 //######################################################################
-util.inherits(NumToken, Token);
+inherits(NumToken, Token);
 function NumToken(string) {
   Token.call(this, 'num', string);
   var string2 = string.slice(0, 2);
@@ -51,17 +60,21 @@ function NumToken(string) {
     this.value = Number(string);
 }
 
+//######################################################################
+inherits(StrToken, Token);
+function StrToken(string) {
+  Token.call(this, 'str', string);
+  this.value = eval(string);
+}
 
 //######################################################################
-util.inherits(EtcToken, Token);
+inherits(EtcToken, Token);
 function EtcToken(string) {
   Token.call(this, 'etc', string);
 }
 
+//----------------------------------------------------------------------
 exports = module.exports = Token;
-exports.Token = Token;
-exports.OpeToken = OpeToken;
-exports.SymToken = SymToken;
-exports.SepToken = SepToken;
-exports.NumToken = NumToken;
-exports.EtcToken = EtcToken;
+classes.forEach(function (fn) {
+  exports[fn.name] = fn;
+});

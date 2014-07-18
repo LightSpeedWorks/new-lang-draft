@@ -19,7 +19,7 @@ fileName = fileName || 'a.nl'; // *** DEFAULT FILE NAME FOR TEST
 // ファイルを読んで
 // 字句解析 lexer string reader -> token
 // 構文解析(パーサ) parser token -> AST abstract syntax tree
-// 解析木を実行する exec AST
+// 解析木を実行する run AST
 // FileReader
 
 fs.readFile(fileName, function (err, contents) {
@@ -31,7 +31,9 @@ fs.readFile(fileName, function (err, contents) {
   var reader = new StringReader(contents.toString());
   var lexer = new Lexer(reader);
   //var parser = new Parser(lexer);
-  var a;
-  while (a = lexer.read())
-    console.log(util.inspect(a, {colors: true}).replace(/\n /g, ''));
+  var token;
+  while (token = lexer.read()) {
+    console.log([reader.line, reader.column - 1] + '\t' +
+      util.inspect(token, {colors: true}).replace(/\n /g, ''));
+  }
 });

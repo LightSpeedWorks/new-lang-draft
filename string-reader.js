@@ -13,6 +13,8 @@ function StringReader(string) {
   this.contentsLength = this.contents.length;
   this.contentsIndex = 0;
   this.unreadStack = [];
+  this.line = 1;
+  this.column = 1;
 }
 
 //######################################################################
@@ -32,7 +34,12 @@ StringReader.prototype.read = function read() {
   if (this.contentsIndex >= this.contentsLength)
     return null; // EOF
 
-  return this.contents[this.contentsIndex++];
+  var ch = this.contents[this.contentsIndex++];
+
+  if (ch === '\n') this.line++, this.column = 1;
+  else this.column++;
+
+  return ch;
 };
 
 //######################################################################
@@ -47,4 +54,5 @@ StringReader.prototype.unread = function unread(string) {
     this.unreadStack.push(string[i]);
 };
 
+//----------------------------------------------------------------------
 exports = module.exports = StringReader;

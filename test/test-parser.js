@@ -3,9 +3,9 @@
 var util = require('util');
 var fs = require('fs');
 
-var StringReader = require('./string-reader');
-var Lexer = require('./lexer');
-var Parser = require('./parser');
+var StringReader = require('../lib/string-reader');
+var Lexer = require('../lib/lexer');
+var Parser = require('../lib/parser');
 
 var args = process.argv.slice();
 args.shift();

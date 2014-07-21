@@ -32,6 +32,9 @@ fs.readFile(fileName, function (err, contents) {
   var lexer = new Lexer(reader);
   //var parser = new Parser(lexer);
   var token;
-  while (token = lexer.read())
-    console.log(util.inspect(token, {colors: true}).replace(/\n /g, ''));
+  while (token = lexer.read()) {
+    console.log('\x1b[36;1m' + token + '\x1b[m');
+    console.log(util.inspect(token, {colors: true}));
+    console.log();
+  }
 });

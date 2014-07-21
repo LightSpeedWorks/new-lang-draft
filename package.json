@@ -1,0 +1,26 @@
+{
+  "name": "new-lang-draft",
+  "version": "0.0.0",
+  "description": "new-lang-draft",
+  "main": "index.js",
+  "private": true,
+  "keywords": [
+    "new-lang"
+  ],
+  "author": "LightSpeedC",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "cd test && do-test"
+  },
+  "homepage": "https://github.com/LightSpeedWorks/new-lang-draft",
+  "bugs": {
+    "url": "https://github.com/LightSpeedWorks/new-lang-draft/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LightSpeedWorks/new-lang-draft.git"
+  },
+  "license": "MIT"
+}

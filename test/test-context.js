@@ -40,7 +40,11 @@ fs.readFile(fileName, function (err, contents) {
   while (syntax = parser.parseStatement()) {
     console.log(util.inspect(syntax, {colors: true, depth: null}));
     console.log('###### \x1b[36;1m' + syntax + '\x1b[m');
-    console.log('### -> ' + util.inspect(syntax.run(context), {colors: true, depth: null}));
+    try {
+      console.log('### -> ' + util.inspect(syntax.run(context), {colors: true, depth: null}));
+    } catch (err) {
+      console.log('###### \x1b[31;1m' + err + '\x1b[m');
+    }
     console.log();
   }
 });

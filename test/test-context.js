@@ -7,10 +7,8 @@ var StringReader = require('../lib/string-reader');
 var Lexer = require('../lib/lexer');
 var Parser = require('../lib/parser');
 var Context = require('../lib/context');
-var Frame = Context.Frame;
 
-var globalFrame = new Frame();
-var context = new Context(globalFrame);
+var ctx = new Context(null);
 
 var args = process.argv.slice();
 args.shift();
@@ -41,9 +39,9 @@ fs.readFile(fileName, function (err, contents) {
     console.log(util.inspect(syntax, {colors: true, depth: null}));
     console.log('###### \x1b[36;1m' + syntax + '\x1b[m');
     try {
-      console.log('### -> ' + util.inspect(syntax.run(context), {colors: true, depth: null}));
+      console.log('### -> ' + util.inspect(syntax.run(ctx), {colors: true, depth: null}));
     } catch (err) {
-      console.log('###### \x1b[31;1m' + err + '\x1b[m');
+      console.log('###### \x1b[31;1m' + err.stack + '\x1b[m');
     }
     console.log();
   }

@@ -1,3 +1,4 @@
-a=1;
-b=a+1;
-c=a+b*3;
+var a=1;
+var b=a+1;
+var c=a+b*3;
+4+x;

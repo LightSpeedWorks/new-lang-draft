@@ -7,5 +7,7 @@ var b=a+1;
 b;
 var c=a+b*3;
 c;
+var d=a*((b+3));
+d;
 4+x;
 y=4+x;

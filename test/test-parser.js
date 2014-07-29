@@ -32,7 +32,15 @@ fs.readFile(fileName, function (err, contents) {
   var lexer = new Lexer(reader);
   var parser = parser = new Parser(lexer);
   var syntax;
-  while (syntax = parser.parseStatement()) {
+  for (;;) {
+    syntax = parser.parseStatement();
+    if (syntax === null && lexer.peek() !== null) {
+      var token = lexer.read();
+      console.log('\x1b[31;1m###### ' + token + '\x1b[m');
+      console.log('### -> ' + util.inspect(token, {colors: true, depth: null}));
+      console.log();
+      continue;
+    }
     console.log(util.inspect(syntax, {colors: true, depth: null}));
     console.log('###### \x1b[36;1m' + syntax + '\x1b[m');
     console.log('### -> ' + util.inspect(syntax.run(null), {colors: true, depth: null}));

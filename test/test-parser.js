@@ -41,6 +41,7 @@ fs.readFile(fileName, function (err, contents) {
       console.log();
       continue;
     }
+    if (syntax === null) break;
     console.log(util.inspect(syntax, {colors: true, depth: null}));
     console.log('###### \x1b[36;1m' + syntax + '\x1b[m');
     console.log('### -> ' + util.inspect(syntax.run(null), {colors: true, depth: null}));

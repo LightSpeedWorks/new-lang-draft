@@ -1,11 +1,6 @@
 'use strict';
 
-describe('Context test', function () {
-it('no errors', function (done) {
-
-var util = require('util');
-var fs = require('fs');
-var path = require('path');
+var assert = require('assert');
 
 var StringReader = require('../lib/string-reader');
 var Lexer = require('../lib/lexer');
@@ -14,43 +9,46 @@ var Context = require('../lib/context');
 
 var ctx = new Context(null);
 
-var args = process.argv.slice();
-args.shift();
-args.shift();
-
-var fileName = args.shift();
-
-fileName = fileName || path.resolve(__dirname, 'test-context.nl'); // *** DEFAULT FILE NAME FOR TEST
-//console.log(util.inspect(args, {colors:true}));
-
-// ファイルを読んで
-// 字句解析 lexer string reader -> token
-// 構文解析(パーサ) parser token -> AST abstract syntax tree
-// 解析木を実行する run AST
-// FileReader
-
-fs.readFile(fileName, function (err, contents) {
-  if (err) {
-    console.log(err.toString());
-    process.exit(1); // error abnormal exit
-  }
-
-  var reader = new StringReader(contents.toString(), fileName);
+function test(contents, expStr, expRun) {
+  var reader = new StringReader(contents.toString(), 'fileName');
   var lexer = new Lexer(reader);
-  var parser = parser = new Parser(lexer);
+  var parser = new Parser(lexer);
   var syntax;
+  var actStr = [];
+  var actRun = [];
   while (syntax = parser.parseStatement()) {
-    console.log(util.inspect(syntax, {colors: true, depth: null}));
-    console.log('###### \x1b[36;1m' + syntax + '\x1b[m');
     try {
-      console.log('### -> ' + util.inspect(syntax.run(ctx), {colors: true, depth: null}));
-    } catch (err) {
-      console.log('###### \x1b[31;1m' + err.stack + '\x1b[m');
+      actStr.push(syntax.toString().trim());
+    } catch (e) {
+      actStr.push(new Error);
     }
-    console.log();
+    try {
+      actRun.push((syntax.run(ctx) + '').trim());
+    } catch (e) {
+      actRun.push(new Error);
+    }
   }
-  done();
-});
+  assert.deepEqual(actStr, expStr);
+  assert.deepEqual(actRun, expRun);
+}
 
-});
+var testCases = [
+  ['a=1;', ['a=1;'], [new Error]],
+  ['b=a+1;', ['b=a+1;'], [new Error]],
+  ['c=a+b*3;', ['c=a+b*3;'], [new Error]],
+  ['var a=1; a;', ['var a = 1;', 'a;'], ['undefined', '1']],
+  ['var b=a+1; b;', ['var b = a+1;', 'b;'], ['undefined', '2']],
+  ['var c=a+b*3; c;', ['var c = a+b*3;', 'c;'], ['undefined', '7']],
+  ['var d=a*((b+3)); d;', ['var d = a*(b+3);', 'd;'], ['undefined', '5']],
+  ['4+x;', ['4+x;'], [new Error]],
+  ['y=4+x;', ['y=4+x;'], [new Error]],
+];
+
+describe('Context test', function () {
+  testCases.forEach(function (elem) {
+    var name = (elem[0].trim() + ' → ' + elem[1].join(' ') + ' → ' + elem[2].join(' ')).replace(/\n/g, '');
+    it(name, function () {
+      test(elem[0], elem[1], elem[2]);
+    });
+  });
 });

@@ -12,7 +12,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "cd test && do-test"
+    "test": "mocha"
   },
   "homepage": "https://github.com/LightSpeedWorks/new-lang-draft",
   "bugs": {

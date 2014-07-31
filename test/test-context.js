@@ -1,7 +1,11 @@
 'use strict';
 
+describe('Context test', function () {
+it('no errors', function (done) {
+
 var util = require('util');
 var fs = require('fs');
+var path = require('path');
 
 var StringReader = require('../lib/string-reader');
 var Lexer = require('../lib/lexer');
@@ -16,7 +20,7 @@ args.shift();
 
 var fileName = args.shift();
 
-fileName = fileName || 'test-context.nl'; // *** DEFAULT FILE NAME FOR TEST
+fileName = fileName || path.resolve(__dirname, 'test-context.nl'); // *** DEFAULT FILE NAME FOR TEST
 //console.log(util.inspect(args, {colors:true}));
 
 // ファイルを読んで
@@ -45,4 +49,8 @@ fs.readFile(fileName, function (err, contents) {
     }
     console.log();
   }
+  done();
+});
+
+});
 });

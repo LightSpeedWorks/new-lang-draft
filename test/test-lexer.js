@@ -1,8 +1,6 @@
 'use strict';
 
 var assert = require('assert');
-var util = require('util');
-var fs = require('fs');
 
 var StringReader = require('../lib/string-reader');
 var Lexer = require('../lib/lexer');
@@ -88,7 +86,8 @@ var testCases = [
 
 describe('Lexer test', function () {
   testCases.forEach(function (elem) {
-    it(elem[0].trim() + ' → ' + elem[1].join(' '), function () {
+    var name = (elem[0].trim() + ' → ' + elem[1].join(' ')).replace(/\n/g, '');
+    it(name, function () {
       test(elem[0], elem[1]);
     });
   });

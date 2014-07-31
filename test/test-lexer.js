@@ -1,5 +1,6 @@
 'use strict';
 
+var assert = require('assert');
 var util = require('util');
 var fs = require('fs');
 
@@ -7,34 +8,88 @@ var StringReader = require('../lib/string-reader');
 var Lexer = require('../lib/lexer');
 var Parser = require('../lib/parser');
 
-var args = process.argv.slice();
-args.shift();
-args.shift();
-
-var fileName = args.shift();
-
-fileName = fileName || 'test-lexer.nl'; // *** DEFAULT FILE NAME FOR TEST
-//console.log(util.inspect(args, {colors:true}));
-
-// ファイルを読んで
-// 字句解析 lexer string reader -> token
-// 構文解析(パーサ) parser token -> AST abstract syntax tree
-// 解析木を実行する run AST
-// FileReader
-
-fs.readFile(fileName, function (err, contents) {
-  if (err) {
-    console.log(err.toString());
-    process.exit(1); // error abnormal exit
-  }
-
-  var reader = new StringReader(contents.toString(), fileName);
+function test(contents, expected) {
+  var reader = new StringReader(contents.toString(), 'fileName');
   var lexer = new Lexer(reader);
-  //var parser = new Parser(lexer);
   var token;
+  var actual = [];
   while (token = lexer.read()) {
-    console.log('\x1b[36;1m' + token + '\x1b[m');
-    console.log(util.inspect(token, {colors: true}));
-    console.log();
+    actual.push(token.toString());
   }
+  assert.deepEqual(actual, expected);
+}
+
+var testCases = [
+  ['   $.$$', ['$', '.', '$$']],
+  ['   __$$', ['__$$']],
+  ['www', ['www']],
+  ['-',   ['-']],
+  ['++',  ['++']],
+  ['--',  ['--']],
+  ['<<',  ['<<']],
+  ['<<<', ['<<<']],
+  ['>>',  ['>>']],
+  ['>>>', ['>>>']],
+  ['==',  ['==']],
+  ['=',   ['=']],
+  ['!==', ['!==']],
+  ['!=',  ['!=']],
+  ['!!',  ['!', '!']],
+  ['>=',  ['>=']],
+  ['<=',  ['<=']],
+  ['->',  ['->']],
+  ['<-',  ['<-']],
+  ['~',   ['~']],
+  ['~~',  ['~', '~']],
+  ['{}()[];', ['{', '}', '(', ')', '[', ']', ';']],
+  ['   abc123', ['abc123']],
+  ['   123xyz', ['123', 'xyz']],
+  ['   1.2', ['1.2']],
+  ['   3', ['3']],
+  ['   3.', ['3.']],
+  ['   .3', ['.3']],
+  ['  456', ['456']],
+  ['  7.8    ', ['7.8']],
+  ['  9e4', ['9e4']],
+  ['  123.toString', ['123', '.', 'toString']],
+  ['  123..toString', ['123', '..', 'toString']],
+  ['  123.3e12ee', ['123.3e12', 'ee']],
+  ['1.2', ['1.2']],
+  ['1..2 a..b', ['1', '..', '2', 'a', '..', 'b']],
+  ['1...3 a...b', ['1', '...', '3', 'a', '...', 'b']],
+  ['||', ['||']],
+  ['&&', ['&&']],
+  [',', [',']],
+  [',,', [',,']],
+  [',.2', [',.', '2']],
+  ['**', ['**']],
+  ['//\n.', ['.']],
+  ['?:', ['?:']],
+  ['.?', ['.?']],
+  ['?.', ['?.']],
+  ['..', ['..']],
+  ['...', ['...']],
+  ['....', ['....']],
+  ['"#%\'\\"@`"', ['"#%\'\\"@`"']],
+  ['0x11 0X11', ['0x11', '0X11']],
+  ['0xff 0XFF', ['0xff', '0XFF']],
+  ['0o77 0O77', ['0o77', '0O77']],
+  ['0b11 0B11', ['0b11', '0B11']],
+  ['"\'str\'"', ['"\'str\'"']],
+  ['\'"str"\'', ['\'"str"\'']],
+  ['"a\\"b"',['"a\\"b"']],
+  ['"a\\"b"',['"a\\"b"']],
+  ["'a\\'b'",["'a\\'b'"]],
+  ['//aaa', ['//aaa']],
+  ['/*xx*/', ['/*xx*/']],
+  ['\'abc\'', ['\'abc\'']],
+  ['123', ['123']],
+];
+
+describe('Lexer test', function () {
+  testCases.forEach(function (elem) {
+    it(elem[0].trim() + ' → ' + elem[1].join(' '), function () {
+      test(elem[0], elem[1]);
+    });
+  });
 });

@@ -91,6 +91,7 @@ var testCases = [
   ['{;}', ['{; }'], ['undefined']],
   ['{{}}', ['{{}}'], ['undefined']],
   ['{};', ['{}', ';'], ['undefined', 'undefined']],
+  ['if (true) 1; else 2;', ['if (true) 1; else 2;'], ['1']],
 ];
 
 describe('Parser test', function () {

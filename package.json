@@ -7,13 +7,13 @@
   "keywords": [
     "new-lang"
   ],
+  "dependencies": {
+    "base-class-extend": ">=0.0.11"
+  },
+  "devDependencies": {
+    "mocha": ">=2.1.0"
+  },
   "author": "LightSpeedC",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "mocha"
-  },
   "homepage": "https://github.com/LightSpeedWorks/new-lang-draft",
   "bugs": {
     "url": "https://github.com/LightSpeedWorks/new-lang-draft/issues"
@@ -22,5 +22,11 @@
     "type": "git",
     "url": "https://github.com/LightSpeedWorks/new-lang-draft.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  }
 }

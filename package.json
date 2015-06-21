@@ -8,10 +8,10 @@
     "new-lang"
   ],
   "dependencies": {
-    "base-class-extend": ">=0.0.11"
+    "base-class-extend": ">=0.0.19"
   },
   "devDependencies": {
-    "mocha": ">=2.1.0"
+    "mocha": ">=2.2.5"
   },
   "author": "LightSpeedC",
   "homepage": "https://github.com/LightSpeedWorks/new-lang-draft",
@@ -20,13 +20,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/LightSpeedWorks/new-lang-draft.git"
+    "url": "LightSpeedWorks/new-lang-draft"
   },
   "license": "MIT",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "cd test & mocha"
   }
 }
